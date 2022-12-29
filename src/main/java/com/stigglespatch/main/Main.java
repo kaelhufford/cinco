@@ -22,6 +22,8 @@ public final class Main extends JavaPlugin implements Listener{
         }
         playerManager = new PlayerManager();
 
+        Bukkit.getPluginCommand("debug").setExecutor(new DebugCommand());
+
         Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
     }

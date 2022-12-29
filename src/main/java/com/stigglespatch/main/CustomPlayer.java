@@ -65,7 +65,6 @@ public class CustomPlayer {
             e.printStackTrace();
         }
     }
-
     public void setLogOffWorld(String world){
         this.logOffWorld = world;
         try {
@@ -75,7 +74,6 @@ public class CustomPlayer {
             e.printStackTrace();
         }
     }
-
     public void setLogOffX(int x){
         this.logOffZ = x;
         try {
@@ -85,6 +83,7 @@ public class CustomPlayer {
             e.printStackTrace();
         }
     }
+
 
     public void setLogOffY(int y){
         this.logOffY = y;
