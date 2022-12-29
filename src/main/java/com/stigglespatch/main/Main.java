@@ -1,11 +1,12 @@
 package com.stigglespatch.main;
 
 import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
 
-public final class Main extends JavaPlugin {
+public final class Main extends JavaPlugin implements Listener{
 
     private Database database;
     private PlayerManager playerManager;
@@ -22,6 +23,7 @@ public final class Main extends JavaPlugin {
         playerManager = new PlayerManager();
 
         Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
+        Bukkit.getPluginManager().registerEvents(this, this);
     }
     @Override
     public void onDisable(){
