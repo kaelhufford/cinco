@@ -1,6 +1,7 @@
 package com.stigglespatch.main;
 
 import org.bukkit.Bukkit;
+import org.bukkit.WorldCreator;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,7 +23,17 @@ public final class Main extends JavaPlugin implements Listener{
         }
         playerManager = new PlayerManager();
 
-        Bukkit.getPluginCommand("debug").setExecutor(new DebugCommand());
+        Bukkit.getPluginCommand("dungeon").setExecutor(new DungeonCommand());
+        Bukkit.getPluginCommand("smp").setExecutor(new SMPCommand());
+        Bukkit.getPluginCommand("creative").setExecutor(new CreativeCommand());
+
+        if (Bukkit.getWorld("smp_cinco") == null){
+            Bukkit.getServer().createWorld(new WorldCreator("smp_cinco"));
+        }
+        if (Bukkit.getWorld("testdungeon") == null){
+            Bukkit.getServer().createWorld(new WorldCreator("testdungeon"));
+        }
+        System.out.println("Generated the third-party worlds.");
 
         Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);

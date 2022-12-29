@@ -4,5 +4,10 @@ main: com.stigglespatch.main.Main
 api-version: 1.19
 authors: [ Accnt ]
 commands:
-  debug:
+  dungeon:
     description: For admins.
+  smp:
+    description: For admins only.
+  creative:
+    description: For admins- only.
+

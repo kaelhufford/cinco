@@ -1,0 +1,33 @@
+dungeons:
+  dungeon-1:
+    attributes:
+      destructible: # true/false
+      difficulty: # easy -> 3 levels, 9 rooms | hard -> 5 levels, 15 rooms | difficult -> 8 levels, 16 rooms | good-luck -> infinite, until the player dies or until they reach level 100
+      dungeon-raid-parties:
+        allow-dungeon-raid-parties: # true/false
+        dungeon-difficulty-multiplier: # MUST be a whole number (This will get multiplied by an already predetermined number, if left blank it will be the default multiplier)
+      artifacts:
+        allow-artifacts: # true/false
+        reward-artifacts: # true/false
+      time:
+        time-limit:
+          enabled: # true/false
+          time: #in MINUTES, NO DECIMALS
+        dungeon-cool-down: #in MINUTES | If left blank, it will be 30 minutes
+      coordinates:
+        x1:
+        y1:
+        z1:
+        # This is here just to separate the different coordinates
+        x2:
+        y2:
+        y3:
+    dungeon-keeper:
+      enabled: # true/false
+      keeper-challenges: # true/false
+      hold-dead-ransom: # true/false -> When a player dies the keeper will make the player do a task before giving them their loot back | If false, players will not lose loot when killed in dungeon
+      coordinates:
+        # This is where the NPC will spawn with a little, already made, set-up
+        x:
+        y:
+        z:
