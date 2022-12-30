@@ -10,4 +10,11 @@ commands:
     description: For admins only.
   creative:
     description: For admins- only.
+  dp:
+    description: Allows you to make a party to raid a dungeon.
+    aliases: dungeon_party
+  start-dungeon:
+    description: idk
+  check:
+    description: hmmm
 
