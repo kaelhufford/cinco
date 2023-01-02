@@ -14,10 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public final class Main extends JavaPlugin implements Listener{
-
-    public ArrayList<Player> players;
-    public ArrayList<Player> alivePlayers;
+public final class Main extends JavaPlugin implements Listener {
 
     private Database database;
     DungeonStartCommand dSC = new DungeonStartCommand();
