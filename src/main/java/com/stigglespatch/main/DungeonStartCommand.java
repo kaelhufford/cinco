@@ -18,7 +18,7 @@ public class DungeonStartCommand implements CommandExecutor, Listener {
     ArrayList players = new ArrayList<Player>();
     ArrayList alivePlayers = new ArrayList<Player>();
 
-    public ArrayList<Player> getPlayers(){
+    public ArrayList<Player> getPlayersList(){
         return players;
     }
 
@@ -52,23 +52,5 @@ public class DungeonStartCommand implements CommandExecutor, Listener {
             System.out.println("NO");
         }
         return false;
-    }
-
-
-    @EventHandler
-    public void onDisconnect(PlayerQuitEvent event){
-        if (players.contains(event.getPlayer())) {
-            players.remove(event.getPlayer());
-        } else {
-            return;
-        }
-    }
-    @EventHandler
-    public void onDeath(PlayerDeathEvent event){
-        if (alivePlayers.contains(event.getEntity())) {
-            alivePlayers.remove(event.getEntity());
-        } else {
-            return;
-        }
     }
 }

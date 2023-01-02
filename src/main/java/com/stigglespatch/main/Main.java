@@ -6,7 +6,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -116,8 +119,27 @@ public final class Main extends JavaPlugin implements Listener{
     @Override
     public void onDisable(){
         database.disconnect();
-        dSC.getPlayers().clear();
+        dSC.getPlayersList().clear();
         dSC.getAlivePlayers().clear();
+    }
+
+    @EventHandler
+    public void onDisconnect(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        if (dSC.getPlayersList().contains(p)){
+            dSC.getPlayersList().remove(p);
+        }
+        if (dSC.getAlivePlayers().contains(p)){
+            dSC.getAlivePlayers().remove(p);
+        }
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) {
+        Player p = (Player) e.getEntity();
+        if (dSC.getAlivePlayers().contains(p)){
+            dSC.getAlivePlayers().remove(p);
+        }
     }
 
     public Database getDatabase() { return database; }
