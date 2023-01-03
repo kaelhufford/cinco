@@ -2,11 +2,14 @@ package com.stigglespatch.main;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 
@@ -20,6 +23,7 @@ public class DungeonStartCommand implements CommandExecutor, Listener {
     public ArrayList<Player> getAlivePlayers(){
         return alivePlayers;
     }
+    boolean move = false;
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -28,13 +32,36 @@ public class DungeonStartCommand implements CommandExecutor, Listener {
                 if(sender.isOp()) {
                     if (!players.contains(p)) {
                         if ((players.size()) <= 3) {//3
-                            p.sendMessage(ChatColor.GREEN + "You are being sent to the dungeon! Prepare yourself! (" + Math.addExact(1, players.size()) + "/4 Players)");
-                            p.teleport(Bukkit.getWorld("testdungeon").getBlockAt(43, -42, 190).getLocation());
-                            players.add(p);
-                            alivePlayers.add(p);
+                            if (players.size() == 0) {
+                                Bukkit.broadcastMessage(ChatColor.YELLOW +"A Dungeon is being started by " + p.getName() +" you have 30 seconds to type the command: /dungeon join " + p.getName());
+                                p.sendMessage(ChatColor.GREEN + "You are being sent to the dungeon! Prepare yourself! (" + Math.addExact(1, players.size()) + "/4 Players)");
+                                p.teleport(Bukkit.getWorld("testdungeon").getBlockAt(43, -42, 190).getLocation());
+                                players.add(p);
+                                alivePlayers.add(p);
 
-                            if (players.size() == 4) {
-                                System.out.println("[DUNGEON ALERT] Dungeon is currently full.");
+                                p.getInventory().clear();
+                                p.getInventory().addItem(new ItemStack(Material.STONE_SWORD));
+                                p.getInventory().addItem(new ItemStack(Material.CHAINMAIL_HELMET));
+                                p.getInventory().addItem(new ItemStack(Material.CHAINMAIL_CHESTPLATE));
+                                p.getInventory().addItem(new ItemStack(Material.CHAINMAIL_LEGGINGS));
+                                p.getInventory().addItem(new ItemStack(Material.CHAINMAIL_BOOTS));
+                                p.getInventory().addItem(new ItemStack(Material.SHIELD));
+                                p.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
+
+                                p.setGameMode(GameMode.ADVENTURE);
+
+
+                                p.sendMessage(ChatColor.GREEN + "You have been given items to aid you in the dungeon! Good luck.");
+
+                            } else {
+                                p.sendMessage(ChatColor.GREEN + "You are being sent to the dungeon! Prepare yourself! (" + Math.addExact(1, players.size()) + "/4 Players)");
+                                p.teleport(Bukkit.getWorld("testdungeon").getBlockAt(43, -42, 190).getLocation());
+                                players.add(p);
+                                alivePlayers.add(p);
+
+                                if (players.size() == 4) {
+                                    System.out.println("[DUNGEON ALERT] Dungeon is currently full.");
+                                }
                             }
 
                     } else {
