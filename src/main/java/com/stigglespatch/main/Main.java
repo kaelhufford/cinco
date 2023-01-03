@@ -99,6 +99,7 @@ public final class Main extends JavaPlugin implements Listener {
                 new Location(Bukkit.getWorld("testdungeon"),90,-41,105));
 
 
+
         Bukkit.getScheduler().runTaskTimer(this, () -> {
                 for (Player p : dSC.getPlayersList()) {
                     if (entryCuboid.contains(p.getLocation())){
