@@ -4,10 +4,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.boss.BossBar;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -20,6 +17,7 @@ import java.util.ArrayList;
 
 public final class Main extends JavaPlugin implements Listener {
     public static ArrayList roomsFinished = new ArrayList<Cuboid>();
+    public static ArrayList zombieSpawnRooms = new ArrayList<Cuboid>();
     public static boolean closedBossEntry = false;
 
 
@@ -30,6 +28,7 @@ public final class Main extends JavaPlugin implements Listener {
         return roomNumber;
     }
     DungeonStartCommand dSC = new DungeonStartCommand();
+    DungeonMobs dungeonMobs = new DungeonMobs(this);
     private PlayerManager playerManager;
 
 
@@ -67,21 +66,27 @@ public final class Main extends JavaPlugin implements Listener {
         Cuboid fillerRoomMine = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),11, -36, 182),
                 new Location(Bukkit.getWorld("testdungeon"),-5, -45, 199));
+        zombieSpawnRooms.add(fillerRoomMine);
         Cuboid targetRoom = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),24,-31,181),
                 new Location(Bukkit.getWorld("testdungeon"),-4,-53,149));
+        zombieSpawnRooms.add(targetRoom);
         Cuboid fillerRoomDrop = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),-3,-39,125),
                 new Location(Bukkit.getWorld("testdungeon"),11,-59,149));
+        zombieSpawnRooms.add(fillerRoomDrop);
         Cuboid collectionRoom = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),11,-48,124),
                 new Location(Bukkit.getWorld("testdungeon"),-16,-58,111));
+        zombieSpawnRooms.add(collectionRoom);
         Cuboid mobRoomNormal = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),12,-49,110),
                 new Location(Bukkit.getWorld("testdungeon"),28,-58,127));
+        zombieSpawnRooms.add(mobRoomNormal);
         Cuboid mobRoomLava = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),27,-49,93),
                 new Location(Bukkit.getWorld("testdungeon"),10,-58,110));
+        zombieSpawnRooms.add(mobRoomLava);
         Cuboid bossRoom = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),62,-23,115),
                 new Location(Bukkit.getWorld("testdungeon"),28,-59,88));
@@ -97,7 +102,6 @@ public final class Main extends JavaPlugin implements Listener {
         Cuboid finalRoomTP = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),109,-49,97),
                 new Location(Bukkit.getWorld("testdungeon"),90,-41,105));
-
 
 
         Bukkit.getScheduler().runTaskTimer(this, () -> {
@@ -209,16 +213,56 @@ public final class Main extends JavaPlugin implements Listener {
                     }
                 }
         },0, 5);
+        int min = 60;
+        int max = 140;
+        int random_int = (int)Math.floor(Math.random()*(max-min+1)+min);
+        long timeBeforeNextSpawn = random_int;
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (Player p : dSC.getAlivePlayers()){
-                int x = (int) p.getLocation().getX();
-                int y = (int) p.getLocation().getY();
-                int z = (int) p.getLocation().getZ();
-                String world = p.getWorld().getName();
+                if(fillerRoomMine.contains(p.getLocation())){
+                    for(Block block : fillerRoomMine.getBlocks()){
+                        if(block.getType().equals(Material.SHROOMLIGHT)){
+                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
+                        }
+                    }
 
-                p.getLocation().getWorld().spawnEntity(new Location(Bukkit.getWorld(world), x,y,z), EntityType.ZOMBIE);
+                } else if(targetRoom.contains(p.getLocation())){
+                    for(Block block : fillerRoomMine.getBlocks()){
+                        if(block.getType().equals(Material.SHROOMLIGHT)){
+                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
+                        }
+                    }
+
+                } else if(fillerRoomDrop.contains(p.getLocation())){
+                    for(Block block : fillerRoomMine.getBlocks()){
+                        if(block.getType().equals(Material.SHROOMLIGHT)){
+                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
+                        }
+                    }
+
+                } else if(collectionRoom.contains(p.getLocation())){
+                    for(Block block : fillerRoomMine.getBlocks()){
+                        if(block.getType().equals(Material.SHROOMLIGHT)){
+                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
+                        }
+                    }
+
+                } else if(mobRoomNormal.contains(p.getLocation())){
+                    for(Block block : fillerRoomMine.getBlocks()){
+                        if(block.getType().equals(Material.SHROOMLIGHT)){
+                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
+                        }
+                    }
+
+                } else if(mobRoomLava.contains(p.getLocation())){
+                    for(Block block : fillerRoomMine.getBlocks()){
+                        if(block.getType().equals(Material.SHROOMLIGHT)){
+                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
+                        }
+                    }
+                }
             }
-        },0, 100);
+        },0, timeBeforeNextSpawn);
     }
     @Override
     public void onDisable(){
