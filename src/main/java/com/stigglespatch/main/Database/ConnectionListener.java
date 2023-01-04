@@ -1,14 +1,12 @@
-package com.stigglespatch.main;
+package com.stigglespatch.main.Database;
 
-import org.bukkit.Location;
-import org.bukkit.World;
+import com.stigglespatch.main.Main;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class ConnectionListener implements Listener {

@@ -1,5 +1,12 @@
 package com.stigglespatch.main;
 
+import com.stigglespatch.main.Database.ConnectionListener;
+import com.stigglespatch.main.Database.Database;
+import com.stigglespatch.main.Database.PlayerManager;
+import com.stigglespatch.main.Dungeon.*;
+import com.stigglespatch.main.Dungeon.Cuboids.Cuboid;
+import com.stigglespatch.main.Misc.CreativeCommand;
+import com.stigglespatch.main.Misc.SMPCommand;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -7,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -102,6 +110,9 @@ public final class Main extends JavaPlugin implements Listener {
         Cuboid finalRoomTP = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),109,-49,97),
                 new Location(Bukkit.getWorld("testdungeon"),90,-41,105));
+        Cuboid tutorialDungeon = new Cuboid(
+                new Location(Bukkit.getWorld("testdungeon"),111, -64, 81),
+                new Location(Bukkit.getWorld("testdungeon"),-20, -14, 211));
 
 
         Bukkit.getScheduler().runTaskTimer(this, () -> {
@@ -204,6 +215,11 @@ public final class Main extends JavaPlugin implements Listener {
                                 player.setAllowFlight(false);
                                 player.setFlying(false);
                             }
+                            for (Entity e : tutorialDungeon.getWorld().getEntities()){
+                                if (tutorialDungeon.contains(e.getLocation())){
+                                    e.remove();
+                                }
+                            }
                             dSC.getPlayersList().clear();
                             dSC.getAlivePlayers().clear();
 
@@ -213,62 +229,61 @@ public final class Main extends JavaPlugin implements Listener {
                     }
                 }
         },0, 5);
+
         int min = 60;
-        int max = 140;
+        int max = 100;
         int random_int = (int)Math.floor(Math.random()*(max-min+1)+min);
         long timeBeforeNextSpawn = random_int;
+
+
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             for (Player p : dSC.getAlivePlayers()){
                 if(fillerRoomMine.contains(p.getLocation())){
-                    for(Block block : fillerRoomMine.getBlocks()){
-                        if(block.getType().equals(Material.SHROOMLIGHT)){
-                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
-                        }
-                    }
+                    getEntitiesInRoom(fillerRoomMine);
 
                 } else if(targetRoom.contains(p.getLocation())){
-                    for(Block block : fillerRoomMine.getBlocks()){
-                        if(block.getType().equals(Material.SHROOMLIGHT)){
-                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
-                        }
-                    }
+                    getEntitiesInRoom(targetRoom);
 
                 } else if(fillerRoomDrop.contains(p.getLocation())){
-                    for(Block block : fillerRoomMine.getBlocks()){
-                        if(block.getType().equals(Material.SHROOMLIGHT)){
-                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
-                        }
-                    }
+                    getEntitiesInRoom(fillerRoomDrop);
 
                 } else if(collectionRoom.contains(p.getLocation())){
-                    for(Block block : fillerRoomMine.getBlocks()){
-                        if(block.getType().equals(Material.SHROOMLIGHT)){
-                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
-                        }
-                    }
+                    getEntitiesInRoom(collectionRoom);
 
                 } else if(mobRoomNormal.contains(p.getLocation())){
-                    for(Block block : fillerRoomMine.getBlocks()){
-                        if(block.getType().equals(Material.SHROOMLIGHT)){
-                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
-                        }
-                    }
+                    getEntitiesInRoom(mobRoomNormal);
 
                 } else if(mobRoomLava.contains(p.getLocation())){
-                    for(Block block : fillerRoomMine.getBlocks()){
-                        if(block.getType().equals(Material.SHROOMLIGHT)){
-                            DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,2,0));
-                        }
-                    }
+                    getEntitiesInRoom(mobRoomLava);
                 }
             }
         },0, timeBeforeNextSpawn);
     }
+    private void getEntitiesInRoom(Cuboid collectionRoom) {
+        for(Block block : collectionRoom.getBlocks()){
+            if(block.getType().equals(Material.LIGHT_GRAY_CANDLE)){
+                DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,1,0));
+            } else if (block.getType().equals(Material.GRAY_CANDLE)){
+                DungeonMobs.spawnDungeonSkeleton(block.getLocation().add(0,1,0));
+            } else if (block.getType().equals(Material.CYAN_CANDLE)){
+                DungeonMobs.spawnDungeonCreeper(block.getLocation().add(0,1,0));
+            }
+        }
+    }
+
     @Override
     public void onDisable(){
         database.disconnect();
         dSC.getPlayersList().clear();
         dSC.getAlivePlayers().clear();
+        roomsFinished.clear();
+    }
+
+    @EventHandler
+    public void onBoomBoom(BlockExplodeEvent e){
+        if(e.getBlock().getWorld().equals("testdungeon")){
+            e.setCancelled(true);
+        }
     }
 
 

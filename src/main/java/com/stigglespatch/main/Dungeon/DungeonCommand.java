@@ -1,5 +1,6 @@
-package com.stigglespatch.main;
+package com.stigglespatch.main.Dungeon;
 
+import com.stigglespatch.main.Main;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -46,21 +47,21 @@ ADD MORE
         if (sender instanceof Player) {
             Player p = (Player) sender;
             if (args.length == 1) {
-                if (args[1].equalsIgnoreCase("level")) {
+                if (args[0].equalsIgnoreCase("level")) {
                     if (dSC.getPlayersList().contains(p)) {
                         p.sendMessage(ChatColor.GREEN + "You are currently on level " + main.getRoomNumber() + ".");
                     } else {
                         p.sendMessage(ChatColor.RED + "You must be in a dungeon to use this command!");
                     }
-                } else if (args[1].equalsIgnoreCase("party")) {
+                } else if (args[0].equalsIgnoreCase("party")) {
 
-                } else if (args[1].equalsIgnoreCase("stage")) {
+                } else if (args[0].equalsIgnoreCase("stage")) {
 
-                } else if (args[1].equalsIgnoreCase("start")) {
+                } else if (args[0].equalsIgnoreCase("start")) {
 
-                } else if (args[1].equalsIgnoreCase("stats")) {
+                } else if (args[0].equalsIgnoreCase("stats")) {
 
-                } else if (args[1].equalsIgnoreCase("world")) {
+                } else if (args[0].equalsIgnoreCase("world")) {
                     if (p.isOp()) {
                         p.teleport(Bukkit.getWorld("testdungeon").getSpawnLocation());
                     } else {
@@ -72,9 +73,9 @@ ADD MORE
 
             } else if (args.length == 2) {
 
-                if (args[1].equalsIgnoreCase("invite")) {
+                if (args[0].equalsIgnoreCase("invite")) {
 
-                } else if (args[1].equalsIgnoreCase("join")) {
+                } else if (args[0].equalsIgnoreCase("join")) {
 
                 } else {
                     p.sendMessage(ChatColor.RED + "You did not this command right! Please double check to see if you misused anything!");

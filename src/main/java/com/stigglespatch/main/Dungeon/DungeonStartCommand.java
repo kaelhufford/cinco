@@ -1,4 +1,4 @@
-package com.stigglespatch.main;
+package com.stigglespatch.main.Dungeon;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -35,16 +35,18 @@ public class DungeonStartCommand implements CommandExecutor, Listener {
                             if (players.size() == 0) {
                                 Bukkit.broadcastMessage(ChatColor.YELLOW +"A Dungeon is being started by " + p.getName() +" you have 30 seconds to type the command: /dungeon join " + p.getName());
                                 p.sendMessage(ChatColor.GREEN + "You are being sent to the dungeon! Prepare yourself! (" + Math.addExact(1, players.size()) + "/4 Players)");
-                                p.teleport(Bukkit.getWorld("testdungeon").getBlockAt(43, -42, 190).getLocation());
+                                p.teleport(Bukkit.getWorld("testdungeon").getBlockAt((int) 43.5, -42, (int) 190.5).getLocation());
+                                p.getLocation().setYaw(90);
+                                p.getLocation().setPitch(0);
                                 players.add(p);
                                 alivePlayers.add(p);
 
                                 p.getInventory().clear();
-                                p.getInventory().addItem(new ItemStack(Material.STONE_SWORD));
-                                p.getInventory().addItem(new ItemStack(Material.CHAINMAIL_HELMET));
-                                p.getInventory().addItem(new ItemStack(Material.CHAINMAIL_CHESTPLATE));
-                                p.getInventory().addItem(new ItemStack(Material.CHAINMAIL_LEGGINGS));
-                                p.getInventory().addItem(new ItemStack(Material.CHAINMAIL_BOOTS));
+                                p.getInventory().addItem(new ItemStack(Material.IRON_SWORD));
+                                p.getInventory().addItem(new ItemStack(Material.IRON_HELMET));
+                                p.getInventory().addItem(new ItemStack(Material.IRON_CHESTPLATE));
+                                p.getInventory().addItem(new ItemStack(Material.IRON_LEGGINGS));
+                                p.getInventory().addItem(new ItemStack(Material.IRON_BOOTS));
                                 p.getInventory().addItem(new ItemStack(Material.SHIELD));
                                 p.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 

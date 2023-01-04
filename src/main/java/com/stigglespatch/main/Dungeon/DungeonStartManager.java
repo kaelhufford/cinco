@@ -1,4 +1,4 @@
-package com.stigglespatch.main;
+package com.stigglespatch.main.Dungeon;
 
 import org.bukkit.ChatColor;
 import org.bukkit.World;

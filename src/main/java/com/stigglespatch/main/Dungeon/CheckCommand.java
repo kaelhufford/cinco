@@ -1,4 +1,4 @@
-package com.stigglespatch.main;
+package com.stigglespatch.main.Dungeon;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

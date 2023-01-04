@@ -1,5 +1,6 @@
-package com.stigglespatch.main;
+package com.stigglespatch.main.Database;
 
+import com.stigglespatch.main.Main;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;

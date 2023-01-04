@@ -1,4 +1,4 @@
-package com.stigglespatch.main;
+package com.stigglespatch.main.Misc;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

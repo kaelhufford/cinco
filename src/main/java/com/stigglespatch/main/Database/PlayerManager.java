@@ -1,4 +1,4 @@
-package com.stigglespatch.main;
+package com.stigglespatch.main.Database;
 
 import java.util.HashMap;
 import java.util.UUID;
