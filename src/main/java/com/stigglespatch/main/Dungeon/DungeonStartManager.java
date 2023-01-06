@@ -1,17 +1,26 @@
 package com.stigglespatch.main.Dungeon;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.ArrayList;
 
 public class DungeonStartManager implements Listener {
     public int countdown;
     private Dungeon dungeon;
     private World world;
+
+    private ArrayList<Player> players;
+    private ArrayList<Player> alivePlayers;
+
 
     public DungeonStartManager (Dungeon dungeon, int countdown) {
         this.countdown = countdown;
@@ -22,12 +31,23 @@ public class DungeonStartManager implements Listener {
     //This will need to be a Bukkit runnable set for every second.
     //We could also add the Cuboid code to this.
     public void everySecond () {
+        if (alivePlayers.isEmpty())
+            return;
+
         if (countdown > 0) {
             --countdown;
         }
         if (countdown == 0) {
             dungeon.start ();
         }
+
+        if (dungeon.getState().equals(DungeonState.STARTED)) {
+            if (alivePlayers.isEmpty()) {
+                dungeon.reset ();
+            }
+
+        }
+
     }
 
 
@@ -75,6 +95,24 @@ public class DungeonStartManager implements Listener {
 
         dungeon.playerQuit(p);
 
+    }
+
+    @EventHandler
+    public void onPlayerDeath (PlayerDeathEvent e) {
+        Player p = e.getEntity();
+        if (!p.getWorld().getName().equals(dungeon.getWorld().getName()))
+            return;
+
+        alivePlayers.remove (p);
+        p.setGameMode(GameMode.SPECTATOR);
+    }
+
+    public ArrayList<Player> getAlivePlayers () {
+        return alivePlayers;
+    }
+
+    public ArrayList<Player> getPlayers () {
+        return players;
     }
 
 }
