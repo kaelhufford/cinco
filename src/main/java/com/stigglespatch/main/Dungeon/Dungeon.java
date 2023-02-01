@@ -15,9 +15,479 @@ import java.util.*;
 
 public class Dungeon {
 
+
+    public static final int MAX_PLAYER_COUNT = 4;
+    private int dungeonID;
+    //World spawn-- This should not change.
+    private Location worldSpawn;
+    //Player spawn-- The current location where the player will respawn when they die. May not necessarily be world spawn,
+    //But in many cases, it probably will be.
+    private Location playerSpawn;
+    //Stores player's main world location before joining the dungeon world.
+    private Map<UUID, Location> oldPlayerLocation;
+    //Stores player's main world inventory before joining the dungeon world.
+    private Map<UUID, PlayerInventory> oldPlayerInventory;
+    //RECRUITING or STARTED
+    private DungeonState state;
+    //Manages the games states, rooms, and timers
+    private DungeonStartManager dungeonManager;
+    private List<UUID> playerID;
+    private List<Cuboid> dungeonCuboids;
+    public static ArrayList roomsFinished = new ArrayList<DungeonRoom>();
+    private int currentRoom;
+    private int nextRoom;
+    private DungeonRoom current;
+    protected List<DungeonRoom> rooms;
+    private boolean active;
+    private Main main;
+
+    public Dungeon(Main main, int dungeonID, Location worldSpawn) {
+
+        this.main = main;
+        this.dungeonID = dungeonID;
+        this.worldSpawn = worldSpawn;
+        this.playerSpawn = worldSpawn; //Note: By default, playerSpawn will be equal to worldSpawn. It should be like
+        //      this to start. After the dungeon begins, this has potential to change,
+        //      but unlikely.
+        this.state = DungeonState.RECRUITING;
+        this.playerID = new ArrayList<>();
+        this.dungeonCuboids = new ArrayList<>();
+        this.oldPlayerLocation = new HashMap<>();
+        this.oldPlayerInventory = new HashMap<>();
+        rooms = new ArrayList<>();
+        active = false;
+
+        //Initialize Rooms...
+
+        setCurrentRoom(0);
+        setNextRoom(1);
+        //This will be uncommented when dungeonManager functionality is finished.
+        this.dungeonManager = new DungeonStartManager(this, 30);
+        Bukkit.getPluginManager().registerEvents(this.dungeonManager, main);
+    }
+
+
+    public Main getMain () { return main; }
+    /**
+     * Teleport the player to the world's player spawnpoint.
+     *
+     * @param player The player to be spawned.
+     */
+    public void spawnPlayer(Player player) {
+        player.teleport(playerSpawn);
+    }
+
+    public void update () {
+        int room = currentRoom;
+        for (int index = currentRoom; index < rooms.size(); ++index) {
+            if (rooms.get(index).checkPlayer(this.getAlivePlayers().get(0), rooms.get(index).getBoundary())) {
+                if (room > currentRoom) {
+                    currentRoom = room;
+                    current = rooms.get(currentRoom);
+                }
+                rooms.get(index).update ();
+                Bukkit.getConsoleSender().sendMessage("Current: " + current.type.toString());
+                return;
+            }
+            ++room;
+        }
+
+
+        /*if (current == null)
+            return;
+
+        current.update();
+        Bukkit.getConsoleSender().sendMessage("Current: " + current.type.toString());
+
+        if(!current.checkAllPlayers(current.getBoundary())) {
+            if (currentRoom != nextRoom && getNextRoom().checkAllPlayers(getNextRoom().getBoundary())) {
+                this.goToNextRoom();
+                Bukkit.getConsoleSender().sendMessage("Player has advanced to the next room!");
+            }
+            //for (Player p : dungeonManager.getAlivePlayers())
+            //    current.teleportRoomSpawn(p);
+        }
+        /*if (!current.isRoomActive()) {
+            this.goToNextRoom();
+
+
+        }*/
+    }
+
+    public void goToNextRoom () {
+        ++currentRoom;
+        nextRoom = currentRoom + 1;
+
+        if (this.getCurrentRoomIndex() >= rooms.size () - 1) {
+            currentRoom = rooms.size() - 1;
+            nextRoom = rooms.size() - 1;
+        }
+        current = getNextRoom();
+
+    }
+    /**
+     * Retrieve the player spawn location.
+     *
+     * @return The location object of playerSpawn
+     */
+    public Location getPlayerSpawn() {
+        return playerSpawn;
+    }
+
+    /**
+     * Retrieve the world spawn location.
+     *
+     * @return The location object of worldSpawn.
+     */
+    public Location getWorldSpawn() {
+        return worldSpawn;
+    }
+
+    /**
+     * Retrieve the world the dungeon is located in.
+     *
+     * @return The world object
+     */
+    public World getWorld() {
+        return worldSpawn.getWorld();
+    }
+
+    /**
+     * Returns how many players are in the dungeon.
+     *
+     * @return The size of the players ArrayList.
+     */
+    public int getPlayerCount() {
+        return playerID.size();
+    }
+
+    /**
+     * Return the maximum number of players that may join the dungeon.
+     *
+     * @return MAX_PLAYER_COUNT
+     */
+    public int getMaxPlayerCount() {
+        return MAX_PLAYER_COUNT;
+    }
+
+    /**
+     * Retrieve the ArrayList index of the room the players are currently in.
+     *
+     * @return integer index
+     */
+    public int getCurrentRoomIndex() {
+        return currentRoom;
+    }
+
+    public Material getBlockBelowPlayer (Player p) {
+        return getWorld().getBlockAt( (int) p.getLocation().getX(), 0, (int) p.getLocation().getZ()).getType();
+    }
+
+    public RoomType getPlayerRoom () {
+        return getRoomType(getBlockBelowPlayer(this.getAlivePlayers().get(0)));
+    }
+    public boolean isSameRoom () {
+        if (playerID.isEmpty())
+            return false;
+
+        return getPlayerRoom().equals (current.type);
+    }
+
+    public void createRoomFromType () {
+
+    }
+    public void checkCurrentRoom () {
+        ArrayList<Player> alive = this.getAlivePlayers();
+        if (alive.isEmpty())
+            return;
+
+        getBlockBelowPlayer(alive.get(0));
+    }
+
+    public ArrayList<Player> getAlivePlayers () { return dungeonManager.getAlivePlayers(); }
+    //public ArrayList<Player> getPlayers () { return dungeonManager.getPlayers (); }
+
+    public RoomType getRoomType(Material m) {
+        if (m == Material.LIME_CONCRETE)
+            return RoomType.LOBBY;
+        if (m == Material.BLUE_CONCRETE)
+            return RoomType.FILLER;
+        if (m == Material.LIGHT_BLUE_CONCRETE)
+            return RoomType.FIND;
+        if (m == Material.CYAN_CONCRETE)
+            return RoomType.PARKOUR;
+        if (m == Material.YELLOW_CONCRETE)
+            return RoomType.COLLECTION;
+        if (m == Material.GRAY_CONCRETE)
+            return RoomType.STAGE_CONNECTION;
+        if (m == Material.PINK_CONCRETE)
+            return RoomType.TARGET;
+        if (m == Material.RED_CONCRETE)
+            return RoomType.MOB;
+        if (m == Material.MAGENTA_CONCRETE)
+            return RoomType.WAVE;
+        if (m == Material.BLACK_CONCRETE)
+            return RoomType.BOSS;
+        if (m == Material.ORANGE_CONCRETE)
+            return RoomType.FINAL;
+        return RoomType.NULL;
+    }
+    /**
+     * Retrieve the ArrayList index of the room the players will go to next.
+     *
+     * @return integer index
+     */
+    public int getNextRoomIndex() {
+        return nextRoom;
+    }
+
+    /**
+     * Retrieve the current room the players are in.
+     *
+     * @return DungeonRoom that the players are in
+     */
+    public DungeonRoom getCurrentRoom() {
+        return rooms.get(currentRoom);
+    }
+
+    /**
+     * Retrieve the next room the players will go to.
+     *
+     * @return DungeonRoom that players will advance to next.
+     */
+    public DungeonRoom getNextRoom() {
+        return rooms.get(nextRoom);
+    }
+
+    /**
+     * Retrieve all the rooms in a dungeon.
+     *
+     * @return A list of all the DungeonRooms
+     */
+    public List<DungeonRoom> getRooms() {
+        return rooms;
+    }
+
+    /**
+     * Set the room index of the room the players are currently in.
+     *
+     * @param index integer value
+     */
+    public void setCurrentRoom(int index) {
+        currentRoom = index;
+    }
+
+    /**
+     * Set the room index of the room the players are going to next.
+     *
+     * @param index integer value
+     */
+    public void setNextRoom(int index) {
+        nextRoom = index;
+
+        if (nextRoom > rooms.size())
+            nextRoom = currentRoom;
+
+    }
+
+    /**
+     * Set player's next spawn location with given coordinates
+     *
+     * @param x coordinate
+     * @param y coordinate
+     * @param z coordinate
+     */
+    public void setPlayerSpawn(float x, float y, float z) {
+        playerSpawn = new Location(worldSpawn.getWorld(), x, y, z);
+    }
+
+    /**
+     * Set the world's spawn location based on the world and given coordinates.
+     *
+     * @param location A location object containing the dungeon world and x, y, z coordinates.
+     */
+    public void setWorldSpawn(Location location) {
+        worldSpawn = location;
+    }
+
+    /**
+     * Set world spawn location with given coordinates within the same world.
+     *
+     * @param x coordinate
+     * @param y coordinate
+     * @param z coordinate
+     */
+    public void setWorldSpawn(float x, float y, float z) {
+        worldSpawn = new Location(worldSpawn.getWorld(), x, y, z);
+    }
+
+    /**
+     * Retrieve the list of players active in the dungeon.
+     *
+     * @return ArrayList of Players.
+     */
+    public List<UUID> getPlayerIDs () {
+        return playerID;
+    }
+
+    /**
+     * Add a new player to the Player ArrayList.
+     *
+     * @param p The player to be added.
+     */
+    public void addPlayerID(Player p) {
+        playerID.add(p.getUniqueId());
+    }
+
+    /**
+     * Remove a player from the Player ArrayList
+     *
+     * @param p The player to be removed.
+     */
+    public void removePlayerID(Player p) {
+        playerID.remove(p.getUniqueId());
+    }
+
+    /**
+     * Prepare the player for joining the dungeon. Will back up the player's information and
+     * set a new location and inventory.
+     *
+     * @param p The player joining the dungeon.
+     */
+    public void playerJoin(Player p) {
+        Bukkit.getServer().getConsoleSender().sendMessage("Dungeon: " + p.getName() + " has joined!");
+        oldPlayerLocation.put(p.getUniqueId(), p.getLocation());
+        oldPlayerInventory.put(p.getUniqueId(), p.getInventory());
+
+        this.addPlayerID(p);
+        this.spawnPlayer(p);
+
+        dungeonManager.join(p);
+    }
+
+    /**
+     * Check if the dungeon is marked as active or not
+     *
+     * @return The boolean active
+     */
+    public boolean isActive() {
+        return active;
+    }
+
+    /*
+        Make a checking system for if player quits during a dungeon.
+     */
+    /**
+     * Prepare the player for returning to the main world. Restores their information
+     * to its original state, then teleports them back.
+     *
+     * @param p The player that is leaving the dungeon.
+     */
+    public void playerQuit(Player p) {
+        dungeonManager.leave (p);
+
+        this.removePlayerID(p);
+        Location oldLocation = oldPlayerLocation.remove(p.getUniqueId());
+        PlayerInventory inv = oldPlayerInventory.remove(p.getUniqueId());
+        //Clear current inventory
+        p.getInventory().clear();
+
+        //Set old inventory
+        p.getInventory().setContents(inv.getContents());
+        p.getInventory().setArmorContents(inv.getArmorContents());
+        p.getInventory().setExtraContents(inv.getExtraContents());
+
+        //TP player back to their previous location
+        p.teleport(oldLocation);
+    }
+
+    /**
+     * Retrieve the Dungeon Manager, which holds and operates important dungeon related events.
+     *
+     * @return Dungeon manager.
+     */
+    public DungeonStartManager getDungeonManager() {
+        return dungeonManager;
+    }
+
+    /**
+     * Get the current state of the dungeon:
+     * (RECRUITING, STARTED).
+     *
+     * @return state
+     */
+    public DungeonState getState() {
+        return state;
+    }
+    public void setState (DungeonState state) {
+        this.state = state;
+    }
+
+    public boolean isFull () { return (playerID.size() == MAX_PLAYER_COUNT); }
+    public void checkPlayerLocations(List<Player> playerList) {
+        for (Player p : playerList) {
+            if (roomsFinished.contains(p.getLocation())) {
+                p.teleport(rooms.get(currentRoom).getSpawnLocation());
+            }
+        }
+    }
+
+    public void killMobs() {
+        List<Entity> entities = getWorldEntities();
+        if (entities == null || entities.isEmpty())
+            return;
+
+        for (Entity entity : entities) {
+            //Add other entities that should not be killed
+            if (!(entity instanceof Player) && !(entity instanceof ItemFrame) && !(entity instanceof ArmorStand)) {
+                entity.remove();
+            }
+        }
+    }
+
+    public List<Entity> getWorldEntities() {
+        if (worldSpawn.getWorld() == null)
+            return null;
+        return worldSpawn.getWorld().getEntities();
+    }
+
+    public void start() {
+        active = true;
+        currentRoom = 0;
+        nextRoom = 1;
+        state = DungeonState.STARTED;
+        current = rooms.get (0);
+        //rooms.get(currentRoom).update();
+        //Remove barriers at entrance
+    }
+
+    public void reset() {
+        for (Player p : dungeonManager.getPlayers()) {
+            playerQuit(p);
+        }
+        active = false;
+        killMobs();
+
+        if (rooms != null && !rooms.isEmpty()) {
+            for (DungeonRoom room : rooms) {
+                room.resetRoom();
+            }
+        }
+        Bukkit.broadcastMessage(ChatColor.YELLOW +"The dungeon has been reset! Do /start-dungeon to begin!");
+
+    }
+
+    public void failed() {
+        state = DungeonState.FAILED;
+    }
+
+
+
+
     /**
      * Describes the variety of different types of rooms there can be.
      */
+
     protected enum RoomType {
         LOBBY,
         FILLER,
@@ -30,8 +500,11 @@ public class Dungeon {
         MOB,
         WAVE,
         BOSS,
-        FINAL
+        FINAL,
+        NULL
     }
+
+
 
     /* This is going to be a long section of class definitions.
      * There will be a room definition for each type.
@@ -45,9 +518,9 @@ public class Dungeon {
         private Material fillType = Material.BLUE_WOOL;
         private Location spawnLocation;
 
-        private boolean finished;
+        private boolean finished = false;
         private boolean roomActive;
-        protected boolean enteredRoom;
+        protected boolean enteredRoom = false;
 
         protected boolean triggered = false;
         private RoomType type;
@@ -62,12 +535,16 @@ public class Dungeon {
             this.boundary = boundary;
             this.spawnLocation = spawn;
 
+
             trigger = findTrigger();
             entrance = findEntrance();
             exit = findExit();
 
-            Location l = trigger.getCenter();
-            this.spawnLocation = new Location (getWorld(), l.getBlockX() + 0.5, l.getBlockY() - 0.5, l.getBlockZ() + 0.5);
+            Location l = new Location (getWorld(), 0.5, 0.5, 0.5);
+            if (trigger != null)
+                l = trigger.getCenter();
+
+            this.spawnLocation = new Location(getWorld(), l.getBlockX() + 0.5, l.getBlockY() - 0.5, l.getBlockZ() + 0.5);
         }
 
         public DungeonRoom(Cuboid boundary, Cuboid entrance, Location spawn) {
@@ -99,11 +576,12 @@ public class Dungeon {
             for (Block b : boundary) {
                 if (b.getType().equals(Material.COMMAND_BLOCK)) {
                     return new Cuboid (getWorld(), b.getLocation().getBlockX() - 1, b.getLocation().getBlockY() + 2, b.getLocation().getBlockZ() - 1,
-                                            b.getLocation().getBlockX() + 1, b.getLocation().getBlockY() + 5, b.getLocation().getBlockZ() + 1);
+                            b.getLocation().getBlockX() + 1, b.getLocation().getBlockY() + 5, b.getLocation().getBlockZ() + 1);
                 }
             }
             return null;
         }
+
         /** Locates the defined entrance (WHITE_GLAZED_TERRACOTTA) in the cuboid boundary.
          *
          * @return The 3x1 cuboid
@@ -121,7 +599,7 @@ public class Dungeon {
             if (blocks.size() == 1) {
                 Location l = blocks.get(0);
                 return new Cuboid (getWorld(), l.getBlockX(), l.getBlockY() + 2, l.getBlockZ(),
-                                        l.getBlockX(), l.getBlockY() + 5, l.getBlockZ());
+                        l.getBlockX(), l.getBlockY() + 5, l.getBlockZ());
             }
             else if (blocks.size() == 2) {
                 Location l1 = blocks.get(0);
@@ -224,20 +702,27 @@ public class Dungeon {
         }
 
         public void update() {
-            if (!active)
+            if (finished)
                 return;
-            /*if (!enteredRoom)
-                if (checkAllPlayers(boundary))
-                    for (Player player : dungeonManager.getAlivePlayers())
-                        onPlayerEnter(player);
+            if (!enteredRoom) {
+                if (checkAllPlayers(boundary)) {
+                    onPlayerEnter(dungeonManager.getAlivePlayers().get(0));
+                    enteredRoom = true;
+                }
+            }
+            if (trigger == null)
+                return;
             if (!triggered)
-                if (checkAllPlayers(trigger))
-                    onTrigger();*/
-            if (checkAllPlayers(next.trigger)) {
+                if(checkPlayer(dungeonManager.getAlivePlayers().get(0), trigger))
+                    onTrigger();
+
+            //if(checkAllPlayers(trigger));
+            /*if (checkAllPlayers(next.trigger)) { //Next time you work on this, you are gonna work here. The way oyu implemented this
+                                                //Does not require using next. So, figure out how to check only current trigger. (Look in dungeon.update)
                 active = false;
                 finished = true;
                 next.onTrigger();
-            }
+            }*/
         }
         public abstract void onPlayerEnter(Player player);
         public void onTrigger () {
@@ -249,10 +734,13 @@ public class Dungeon {
             }
         }
 
+        public boolean checkPlayer (Player p, Cuboid container) {
+            return container.contains(p.getLocation());
+        }
         public boolean checkAllPlayers (Cuboid container) {
             for (Player player : dungeonManager.getAlivePlayers()) {
-               if (!container.contains(player.getLocation()))
-                   return false;
+                if (!container.contains(player.getLocation()))
+                    return false;
             }
             return true;
         }
@@ -299,11 +787,13 @@ public class Dungeon {
         public SpawnerDungeonRoom(Cuboid boundary) {
             super(boundary);
             spawnerBlocks = new HashMap<>();
+            addSpawnerBlocks();
         }
 
         public SpawnerDungeonRoom(Cuboid boundary, Cuboid trigger, Cuboid entrance, Cuboid exit, Location spawn) {
             super(boundary, trigger, entrance, exit, spawn);
             spawnerBlocks = new HashMap<>();
+            addSpawnerBlocks();
         }
 
         public boolean hasSpawned() {
@@ -328,12 +818,15 @@ public class Dungeon {
         }
 
         public void spawnMobs() {
+
             if (spawnerBlocks == null || spawnerBlocks.isEmpty())
                 return;
             for (Block block : spawnerBlocks.keySet()) {
                 DungeonMobs.spawnDungeonMobs(block.getLocation().add(0, 1, 0), spawnerBlocks.get(block));
 
             }
+            Bukkit.getConsoleSender().sendMessage("Spawned mobs in " + this.getType().toString());
+            spawned = true;
         }
 
     }
@@ -379,8 +872,8 @@ public class Dungeon {
             if (!dungeonManager.isStarted())
                 return;
 
-            if (!triggered)
-                onTrigger();
+            /*if (!triggered)
+                onTrigger();*/
 
             super.update();
         }
@@ -501,13 +994,17 @@ public class Dungeon {
                     targetBlocks.add(block);
                 }
             }
+            Bukkit.getConsoleSender().sendMessage("Found " + targetBlocks.size() + " blocks");
         }
 
         public boolean checkTargets() {
+            int count = 0;
             for (Block block : targetBlocks) {
                 if (!block.isBlockPowered()) {
+                    Bukkit.getConsoleSender().sendMessage(count + "/5 targets hit");
                     return false;
                 }
+                ++count;
             }
             return true;
         }
@@ -515,7 +1012,7 @@ public class Dungeon {
         public void onHitAllTargets() {
             targetBlocks.clear();
             openExit();
-            Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "An entrance has opened!");
+            dungeonManager.sendPlayersMessage(ChatColor.GREEN + "An entrance has opened!");
         }
 
         @Override
@@ -523,6 +1020,7 @@ public class Dungeon {
             if (!targetBlocks.isEmpty() && checkTargets()) {
                 onHitAllTargets();
             }
+            super.update ();
         }
     }
     protected class MobRoom extends SpawnerDungeonRoom {
@@ -665,381 +1163,7 @@ public class Dungeon {
 
         @Override
         public void update() {
-
+            super.update();
         }
-    }
-
-    public static final int MAX_PLAYER_COUNT = 4;
-    private int dungeonID;
-    //World spawn-- This should not change.
-    private Location worldSpawn;
-    //Player spawn-- The current location where the player will respawn when they die. May not necessarily be world spawn,
-    //But in many cases, it probably will be.
-    private Location playerSpawn;
-    //Stores player's main world location before joining the dungeon world.
-    private Map<UUID, Location> oldPlayerLocation;
-    //Stores player's main world inventory before joining the dungeon world.
-    private Map<UUID, PlayerInventory> oldPlayerInventory;
-    //RECRUITING or STARTED
-    private DungeonState state;
-    //Manages the games states, rooms, and timers
-    private DungeonStartManager dungeonManager;
-    private List<UUID> players;
-    private List<Cuboid> dungeonCuboids;
-    public static ArrayList roomsFinished = new ArrayList<DungeonRoom>();
-    private int currentRoom;
-    private int nextRoom;
-    private DungeonRoom current;
-    protected List<DungeonRoom> rooms;
-    private boolean active;
-    private Main main;
-
-    public Dungeon(Main main, int dungeonID, Location worldSpawn) {
-
-        this.main = main;
-        this.dungeonID = dungeonID;
-        this.worldSpawn = worldSpawn;
-        this.playerSpawn = worldSpawn; //Note: By default, playerSpawn will be equal to worldSpawn. It should be like
-        //      this to start. After the dungeon begins, this has potential to change,
-        //      but unlikely.
-        this.state = DungeonState.RECRUITING;
-        this.players = new ArrayList<>();
-        this.dungeonCuboids = new ArrayList<>();
-        this.oldPlayerLocation = new HashMap<>();
-        this.oldPlayerInventory = new HashMap<>();
-        rooms = new ArrayList<>();
-        active = false;
-
-        //Initialize Rooms...
-
-        setCurrentRoom(0);
-        setNextRoom(1);
-        //This will be uncommented when dungeonManager functionality is finished.
-        this.dungeonManager = new DungeonStartManager(this, 30);
-        Bukkit.getPluginManager().registerEvents(this.dungeonManager, main);
-    }
-
-
-    public Main getMain () { return main; }
-    /**
-     * Teleport the player to the world's player spawnpoint.
-     *
-     * @param player The player to be spawned.
-     */
-    public void spawnPlayer(Player player) {
-        player.teleport(playerSpawn);
-    }
-
-    public void update () {
-        if (current == null)
-            return;
-
-        current.update();
-
-        if (!current.isRoomActive() && current.next != null) {
-            current = current.next;
-            if(!current.checkAllPlayers(current.getBoundary())) {
-                for (Player p : dungeonManager.getAlivePlayers())
-                    current.teleportRoomSpawn(p);
-            }
-        }
-    }
-
-    /**
-     * Retrieve the player spawn location.
-     *
-     * @return The location object of playerSpawn
-     */
-    public Location getPlayerSpawn() {
-        return playerSpawn;
-    }
-
-    /**
-     * Retrieve the world spawn location.
-     *
-     * @return The location object of worldSpawn.
-     */
-    public Location getWorldSpawn() {
-        return worldSpawn;
-    }
-
-    /**
-     * Retrieve the world the dungeon is located in.
-     *
-     * @return The world object
-     */
-    public World getWorld() {
-        return worldSpawn.getWorld();
-    }
-
-    /**
-     * Returns how many players are in the dungeon.
-     *
-     * @return The size of the players ArrayList.
-     */
-    public int getPlayerCount() {
-        return players.size();
-    }
-
-    /**
-     * Return the maximum number of players that may join the dungeon.
-     *
-     * @return MAX_PLAYER_COUNT
-     */
-    public int getMaxPlayerCount() {
-        return MAX_PLAYER_COUNT;
-    }
-
-    /**
-     * Retrieve the ArrayList index of the room the players are currently in.
-     *
-     * @return integer index
-     */
-    public int getCurrentRoomIndex() {
-        return currentRoom;
-    }
-
-    /**
-     * Retrieve the ArrayList index of the room the players will go to next.
-     *
-     * @return integer index
-     */
-    public int getNextRoomIndex() {
-        return nextRoom;
-    }
-
-    /**
-     * Retrieve the current room the players are in.
-     *
-     * @return DungeonRoom that the players are in
-     */
-    public DungeonRoom getCurrentRoom() {
-        return rooms.get(currentRoom);
-    }
-
-    /**
-     * Retrieve the next room the players will go to.
-     *
-     * @return DungeonRoom that players will advance to next.
-     */
-    public DungeonRoom getNextRoom() {
-        return rooms.get(nextRoom);
-    }
-
-    /**
-     * Retrieve all the rooms in a dungeon.
-     *
-     * @return A list of all the DungeonRooms
-     */
-    public List<DungeonRoom> getRooms() {
-        return rooms;
-    }
-
-    /**
-     * Set the room index of the room the players are currently in.
-     *
-     * @param index integer value
-     */
-    public void setCurrentRoom(int index) {
-        currentRoom = index;
-    }
-
-    /**
-     * Set the room index of the room the players are going to next.
-     *
-     * @param index integer value
-     */
-    public void setNextRoom(int index) {
-        nextRoom = index;
-
-        if (nextRoom > rooms.size())
-            nextRoom = currentRoom;
-
-    }
-
-    /**
-     * Set player's next spawn location with given coordinates
-     *
-     * @param x coordinate
-     * @param y coordinate
-     * @param z coordinate
-     */
-    public void setPlayerSpawn(float x, float y, float z) {
-        playerSpawn = new Location(worldSpawn.getWorld(), x, y, z);
-    }
-
-    /**
-     * Set the world's spawn location based on the world and given coordinates.
-     *
-     * @param location A location object containing the dungeon world and x, y, z coordinates.
-     */
-    public void setWorldSpawn(Location location) {
-        worldSpawn = location;
-    }
-
-    /**
-     * Set world spawn location with given coordinates within the same world.
-     *
-     * @param x coordinate
-     * @param y coordinate
-     * @param z coordinate
-     */
-    public void setWorldSpawn(float x, float y, float z) {
-        worldSpawn = new Location(worldSpawn.getWorld(), x, y, z);
-    }
-
-    /**
-     * Retrieve the list of players active in the dungeon.
-     *
-     * @return ArrayList of Players.
-     */
-    public List<UUID> getPlayers() {
-        return players;
-    }
-
-    /**
-     * Add a new player to the Player ArrayList.
-     *
-     * @param p The player to be added.
-     */
-    public void addPlayer(Player p) {
-        players.add(p.getUniqueId());
-    }
-
-    /**
-     * Remove a player from the Player ArrayList
-     *
-     * @param p The player to be removed.
-     */
-    public void removePlayer(Player p) {
-        players.remove(p.getUniqueId());
-    }
-
-    /**
-     * Prepare the player for joining the dungeon. Will back up the player's information and
-     * set a new location and inventory.
-     *
-     * @param p The player joining the dungeon.
-     */
-    public void playerJoin(Player p) {
-        oldPlayerLocation.put(p.getUniqueId(), p.getLocation());
-        oldPlayerInventory.put(p.getUniqueId(), p.getInventory());
-
-        this.addPlayer(p);
-        this.spawnPlayer(p);
-
-        dungeonManager.join(p);
-    }
-
-    /**
-     * Check if the dungeon is marked as active or not
-     *
-     * @return The boolean active
-     */
-    public boolean isActive() {
-        return active;
-    }
-
-    /*
-        Make a checking system for if player quits during a dungeon.
-     */
-    /**
-     * Prepare the player for returning to the main world. Restores their information
-     * to its original state, then teleports them back.
-     *
-     * @param p The player that is leaving the dungeon.
-     */
-    public void playerQuit(Player p) {
-        dungeonManager.leave (p);
-
-        this.removePlayer(p);
-        Location oldLocation = oldPlayerLocation.remove(p.getUniqueId());
-        PlayerInventory inv = oldPlayerInventory.remove(p.getUniqueId());
-        //Clear current inventory
-        p.getInventory().clear();
-
-        //Set old inventory
-        p.getInventory().setContents(inv.getContents());
-        p.getInventory().setArmorContents(inv.getArmorContents());
-        p.getInventory().setExtraContents(inv.getExtraContents());
-
-        //TP player back to their previous location
-        p.teleport(oldLocation);
-    }
-
-    /**
-     * Retrieve the Dungeon Manager, which holds and operates important dungeon related events.
-     *
-     * @return Dungeon manager.
-     */
-    public DungeonStartManager getDungeonManager() {
-        return dungeonManager;
-    }
-
-    /**
-     * Get the current state of the dungeon:
-     * (RECRUITING, STARTED).
-     *
-     * @return state
-     */
-    public DungeonState getState() {
-        return state;
-    }
-
-
-    public boolean isFull () { return (players.size() == MAX_PLAYER_COUNT); }
-    public void checkPlayerLocations(List<Player> playerList) {
-        for (Player p : playerList) {
-            if (roomsFinished.contains(p.getLocation())) {
-                p.teleport(rooms.get(currentRoom).getSpawnLocation());
-            }
-        }
-    }
-
-    public void killMobs() {
-        List<Entity> entities = getWorldEntities();
-        if (entities == null || entities.isEmpty())
-            return;
-
-        for (Entity entity : entities) {
-            //Add other entities that should not be killed
-            if (!(entity instanceof Player) && !(entity instanceof ItemFrame) && !(entity instanceof ArmorStand)) {
-                entity.remove();
-            }
-        }
-    }
-
-    public List<Entity> getWorldEntities() {
-        if (worldSpawn.getWorld() == null)
-            return null;
-        return worldSpawn.getWorld().getEntities();
-    }
-
-    public void start() {
-        active = true;
-        currentRoom = 0;
-        nextRoom = 1;
-        state = DungeonState.STARTED;
-        rooms.get(currentRoom).update();
-        //Remove barriers at entrance
-    }
-
-    public void reset() {
-        for (Player p : dungeonManager.getPlayers()) {
-            playerQuit(p);
-        }
-        active = false;
-        killMobs();
-
-        if (rooms != null && !rooms.isEmpty()) {
-            for (DungeonRoom room : rooms) {
-                room.resetRoom();
-            }
-        }
-        Bukkit.broadcastMessage(ChatColor.YELLOW +"The dungeon has been reset! Do /start-dungeon to begin!");
-    }
-
-    public void failed() {
-        state = DungeonState.FAILED;
     }
 }

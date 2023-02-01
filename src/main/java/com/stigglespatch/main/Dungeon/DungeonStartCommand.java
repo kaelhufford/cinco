@@ -35,12 +35,12 @@ public class DungeonStartCommand implements CommandExecutor, Listener {
                             if (players.size() == 0) {
                                 Bukkit.broadcastMessage(ChatColor.YELLOW +"A Dungeon is being started by " + p.getName() +" you have 30 seconds to type the command: /dungeon join " + p.getName());
                                 p.sendMessage(ChatColor.GREEN + "You are being sent to the dungeon! Prepare yourself! (" + Math.addExact(1, players.size()) + "/4 Players)");
-                                p.teleport(Bukkit.getWorld("testdungeon").getBlockAt((int) 43.5, -42, (int) 190.5).getLocation());
+                               // p.teleport(Bukkit.getWorld("testdungeon").getBlockAt((int) 43.5, -42, (int) 190.5).getLocation());
                                 p.getLocation().setYaw(90);
                                 p.getLocation().setPitch(0);
-                                players.add(p);
-                                alivePlayers.add(p);
-
+                                //players.add(p);
+                                //alivePlayers.add(p);
+                                DungeonManager.addPlayer(p, "testdungeon");
                                 p.getInventory().clear();
                                 p.getInventory().addItem(new ItemStack(Material.IRON_SWORD));
                                 p.getInventory().addItem(new ItemStack(Material.IRON_HELMET));
@@ -57,9 +57,9 @@ public class DungeonStartCommand implements CommandExecutor, Listener {
 
                             } else {
                                 p.sendMessage(ChatColor.GREEN + "You are being sent to the dungeon! Prepare yourself! (" + Math.addExact(1, players.size()) + "/4 Players)");
-                                p.teleport(Bukkit.getWorld("testdungeon").getBlockAt(43, -42, 190).getLocation());
-                                players.add(p);
-                                alivePlayers.add(p);
+                                //p.teleport(Bukkit.getWorld("testdungeon").getBlockAt(43, -42, 190).getLocation());
+
+                                DungeonManager.addPlayer(p, "testdungeon");
 
                                 if (players.size() == 4) {
                                     System.out.println("[DUNGEON ALERT] Dungeon is currently full.");

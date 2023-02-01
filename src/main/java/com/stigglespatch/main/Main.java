@@ -39,6 +39,7 @@ public final class Main extends JavaPlugin implements Listener {
     DungeonMobs dungeonMobs = new DungeonMobs(this);
     private PlayerManager playerManager;
 
+    DungeonManager dm = new DungeonManager(this);
 
     @Override
     public void onEnable() {
@@ -68,6 +69,9 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new DungeonStartCommand(), this);
 
+
+
+        /*
         Cuboid entryCuboid = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),12, -35, 195),
                 new Location(Bukkit.getWorld("testdungeon"),25, -45, 184));
@@ -257,7 +261,7 @@ public final class Main extends JavaPlugin implements Listener {
                     getEntitiesInRoom(mobRoomLava);
                 }
             }
-        },0, timeBeforeNextSpawn);
+        },0, timeBeforeNextSpawn);*/
     }
     private void getEntitiesInRoom(Cuboid collectionRoom) {
         for(Block block : collectionRoom.getBlocks()){
@@ -274,9 +278,9 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable(){
         database.disconnect();
-        dSC.getPlayersList().clear();
-        dSC.getAlivePlayers().clear();
-        roomsFinished.clear();
+        //dSC.getPlayersList().clear();
+        //dSC.getAlivePlayers().clear();
+        //roomsFinished.clear();
     }
 
     @EventHandler
@@ -289,17 +293,18 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onDisconnect(PlayerQuitEvent e) {
-        Player p = e.getPlayer();
+        /*Player p = e.getPlayer();
         if (dSC.getPlayersList().contains(p)){
             dSC.getPlayersList().remove(p);
         }
         if (dSC.getAlivePlayers().contains(p)){
             dSC.getAlivePlayers().remove(p);
-        }
+        }*/
     }
 
     @EventHandler
     public void onDeath(PlayerDeathEvent e) {
+        /*
         Player p = (Player) e.getEntity();
         if (dSC.getPlayersList().contains(p)){
             p.setAllowFlight(true);
@@ -321,7 +326,7 @@ public final class Main extends JavaPlugin implements Listener {
             }
             dSC.getPlayersList().clear();
             dSC.getAlivePlayers().clear();
-        }
+        }*/
 
 
     }

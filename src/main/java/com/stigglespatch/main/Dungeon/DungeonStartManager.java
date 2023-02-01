@@ -18,7 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.ArrayList;
 
 public class DungeonStartManager implements Listener {
-    private int countdown;
+    private int countdown = 0;
     private int timer = 0;
     private boolean timerActive = false;
 
@@ -36,6 +36,8 @@ public class DungeonStartManager implements Listener {
 
     private Dungeon.DungeonRoom currentRoom;
 
+    private int everySecondTaskID;
+
     public DungeonStartManager (Dungeon dungeon, int countdown) {
         this.countdown = countdown;
         this.dungeon = dungeon;
@@ -46,8 +48,8 @@ public class DungeonStartManager implements Listener {
 
         started = false;
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(dungeon.getMain(), () -> everySecond(), 0L, 20L);
-
+        everySecondTaskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(dungeon.getMain(), () -> everySecond(), 0L, 20L);
+        Bukkit.getServer().getConsoleSender().sendMessage("DungeonStartManager: active!");
     }
 
     //This will need to be a Bukkit runnable set for every second.
@@ -56,26 +58,22 @@ public class DungeonStartManager implements Listener {
         if (alivePlayers.isEmpty())
             return;
 
-
         if (dungeon.getState() == DungeonState.RECRUITING) {
             if (countdown > 0)
                 --countdown;
-
+            Bukkit.getConsoleSender().sendMessage("Time until start: " + countdown);
             if (countdown == 0) {
                 dungeon.start();
                 timerActive = true;
             }
-
-
         }
         else if (dungeon.getState().equals(DungeonState.STARTED)) {
             if (timerActive)
                 ++timer;
-
+            Bukkit.getConsoleSender().sendMessage("Time active: " + timer);
             if (alivePlayers.isEmpty()) {
                 dungeon.reset ();
                 timerActive = false;
-
 
                 this.getPlayers().clear();
                 this.getAlivePlayers().clear();
@@ -108,7 +106,7 @@ public class DungeonStartManager implements Listener {
 
         }
         else if (dungeon.getState() == DungeonState.FAILED) {
-
+            Bukkit.getScheduler().cancelTask(everySecondTaskID);
 
         }
     }
@@ -140,46 +138,38 @@ public class DungeonStartManager implements Listener {
 
     public void join (Player p) {
         //dungeon.playerJoin(p);
-
-
+        Bukkit.getServer().getConsoleSender().sendMessage("DungeonStartManager: " + p.getName() + " has joined!");
         p.setGameMode(GameMode.ADVENTURE);
         p.setInvisible(false);
         p.setAllowFlight(false);
         p.setFlying(false);
 
-        if (dungeon.getState() == DungeonState.RECRUITING) {
-            if (dungeon.getPlayerCount() < dungeon.getMaxPlayerCount()) {
-                //dungeon.playerJoin(p); //Moved this line to before the if statement
-            } else {
-                //Its probably best to stop the player from joining when they run the command. To-do later
-                p.sendMessage(ChatColor.RED + "You can not join, the dungeon is full!");
-            }
+        if (dungeon.getState().equals(DungeonState.RECRUITING)) {
+            if (players.isEmpty())
+                countdown = 30;
 
-            //Set countdown to 10 once all players have joined
             if (dungeon.getPlayerCount() == dungeon.getMaxPlayerCount() && countdown >= 0)
                 countdown = 10;
         }
-        else {
-            //Kick the player from the dungeon if the game started
-            p.sendMessage(ChatColor.RED + "Dungeon is already full! You may start a new dungeon raid once the current one completes.");
-        }
+        this.players.add(p);
+        this.alivePlayers.add(p);
     }
     public void leave (Player p) {
+
+        Bukkit.getServer().getConsoleSender().sendMessage("DungeonStartManager: " + p.getName() + " has left!");
 
         p.setGameMode(GameMode.SURVIVAL);
         p.setInvisible(false);
         p.setAllowFlight(false);
         p.setFlying(false);
 
-        if (!p.getWorld().getName().equals(dungeon.getWorld().getName()))
-            return;
 
-        //If a player leaves, allow for 30 more seconds for players to join.
-        if (dungeon.getState() == DungeonState.RECRUITING) {
+
+        if (dungeon.getState().equals(DungeonState.RECRUITING)) {
+            //If a player leaves, allow for 30 more seconds for players to join.
             if (countdown >= 0)
                 countdown = 30;
         }
-
         this.getPlayers().remove(p);
         this.getAlivePlayers().remove(p);
 
@@ -217,10 +207,15 @@ public class DungeonStartManager implements Listener {
         if (!p.getWorld().getName().equals(dungeon.getWorld().getName()))
             return;
 
-        if (isStarted())
-            dungeon.playerQuit(p);
+        //if (isStarted())
+        dungeon.playerQuit(p);
     }
 
+    public void sendPlayersMessage (String msg) {
+        for (Player p : players) {
+            p.sendMessage(msg);
+        }
+    }
     public ArrayList<Player> getAlivePlayers () {
         return alivePlayers;
     }
