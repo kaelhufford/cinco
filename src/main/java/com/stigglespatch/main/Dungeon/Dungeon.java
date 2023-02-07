@@ -69,7 +69,7 @@ public class Dungeon {
 
     public Main getMain () { return main; }
     /**
-     * Teleport the player to the world's player spawnpoint.
+     * Teleport the player to the world's player spawn point.
      *
      * @param player The player to be spawned.
      */
@@ -510,6 +510,9 @@ public class Dungeon {
      * There will be a room definition for each type.
      */
     protected abstract class DungeonRoom {
+        private final Material TRIGGER_BLOCK = Material.BROWN_GLAZED_TERRACOTTA;
+        private final Material ENTRANCE_BLOCK = Material.WHITE_GLAZED_TERRACOTTA;
+        private final Material EXIT_BLOCK = Material.BLACK_GLAZED_TERRACOTTA;
         private Cuboid boundary;
         private Cuboid entrance;
         private Cuboid exit;
@@ -574,7 +577,7 @@ public class Dungeon {
          */
         public Cuboid findTrigger () {
             for (Block b : boundary) {
-                if (b.getType().equals(Material.COMMAND_BLOCK)) {
+                if (b.getType().equals(TRIGGER_BLOCK)) {
                     return new Cuboid (getWorld(), b.getLocation().getBlockX() - 1, b.getLocation().getBlockY() + 2, b.getLocation().getBlockZ() - 1,
                             b.getLocation().getBlockX() + 1, b.getLocation().getBlockY() + 5, b.getLocation().getBlockZ() + 1);
                 }
@@ -589,7 +592,7 @@ public class Dungeon {
         public Cuboid findEntrance () {
             ArrayList<Location> blocks = new ArrayList<>();
             for (Block b : boundary) {
-                if (b.getType().equals(Material.WHITE_GLAZED_TERRACOTTA)) {
+                if (b.getType().equals(ENTRANCE_BLOCK)) {
                     blocks.add (b.getLocation());
                     //return new Cuboid (getWorld(), b.getLocation().getBlockX(), b.getLocation().getBlockY() + 2, b.getLocation().getBlockZ(),
                     //        b.getLocation().getBlockX(), b.getLocation().getBlockY() + 5, b.getLocation().getBlockZ());
@@ -621,7 +624,7 @@ public class Dungeon {
         public Cuboid findExit () {
             ArrayList<Location> blocks = new ArrayList<>();
             for (Block b : boundary) {
-                if (b.getType().equals(Material.BLACK_GLAZED_TERRACOTTA)) {
+                if (b.getType().equals(EXIT_BLOCK)) {
                     blocks.add(b.getLocation());
                     //return new Cuboid (getWorld(), b.getLocation().getBlockX(), b.getLocation().getBlockY() + 2, b.getLocation().getBlockZ(),
                     //        b.getLocation().getBlockX(), b.getLocation().getBlockY() + 5, b.getLocation().getBlockZ());
@@ -966,7 +969,7 @@ public class Dungeon {
 
         }
     }
-    protected class TargetRoom extends DungeonRoom {
+    protected class TargetRoom extends SpawnerDungeonRoom {
 
         public ArrayList<Block> targetBlocks;
 
@@ -979,18 +982,21 @@ public class Dungeon {
 
         @Override
         public void onPlayerEnter(Player player) {
-
+            spawnMobs();
 
         }
 
         @Override
         public void resetRoom() {
-
+            for (Block block : targetBlocks)
+                block.setType(Material.NETHER_WART_BLOCK);
         }
+
+
 
         public void getTargetBlocks() {
             for (Block block : getBoundary()) {
-                if (block.getType().equals(Material.TARGET)) {
+                if (block.getType().equals(Material.NETHER_WART_BLOCK)) {
                     targetBlocks.add(block);
                 }
             }
@@ -1000,19 +1006,27 @@ public class Dungeon {
         public boolean checkTargets() {
             int count = 0;
             for (Block block : targetBlocks) {
-                if (!block.isBlockPowered()) {
-                    Bukkit.getConsoleSender().sendMessage(count + "/5 targets hit");
-                    return false;
+                if (block.getType().equals(Material.REDSTONE_BLOCK)) {
+                    ++count;
                 }
-                ++count;
             }
-            return true;
+            Bukkit.getConsoleSender().sendMessage(count + "/" + targetBlocks.size() + " targets hit");
+
+            if (count == targetBlocks.size())
+                return true;
+
+            return false;
         }
 
         public void onHitAllTargets() {
+            for (Block b : targetBlocks) {
+                b.setType(Material.NETHER_WART_BLOCK);
+            }
             targetBlocks.clear();
+
             openExit();
             dungeonManager.sendPlayersMessage(ChatColor.GREEN + "An entrance has opened!");
+
         }
 
         @Override
@@ -1052,6 +1066,8 @@ public class Dungeon {
         public WaveRoom(Cuboid boundary) {
             super(boundary);
             setType(RoomType.WAVE);
+            waveCount = 5;
+            timeBetweenWaves = 8;
         }
 
         @Override
@@ -1069,7 +1085,7 @@ public class Dungeon {
             super.update();
 
             if (currentWave != waveCount) {
-                if (countdown >= 0) {
+                if (countdown <= 0) {
                     spawnNextWave();
                     countdown = timeBetweenWaves;
                 }
