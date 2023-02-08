@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class DungeonStartManager implements Listener {
     private int countdown = 0;
     private int timer = 0;
-    private boolean timerActive = false;
+    public boolean timerActive = false;
 
     private boolean started;
 
@@ -64,12 +64,16 @@ public class DungeonStartManager implements Listener {
             Bukkit.getConsoleSender().sendMessage("Time until start: " + countdown);
             if (countdown == 0) {
                 dungeon.start();
-                timerActive = true;
             }
         }
         else if (dungeon.getState().equals(DungeonState.STARTED)) {
-            if (timerActive)
+
+            if (timerActive) {
+                if (timer == 0) {
+                    started = true;
+                }
                 ++timer;
+            }
             Bukkit.getConsoleSender().sendMessage("Time active: " + timer);
             if (alivePlayers.isEmpty()) {
                 dungeon.reset ();

@@ -43,7 +43,7 @@ ADD MORE
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-
+/*
         if (sender instanceof Player) {
             Player p = (Player) sender;
             if (args.length == 1) {
@@ -88,6 +88,7 @@ ADD MORE
             System.out.println("You may not use this command in console!");
         }
 
+        return false;*/
         return false;
     }
 }

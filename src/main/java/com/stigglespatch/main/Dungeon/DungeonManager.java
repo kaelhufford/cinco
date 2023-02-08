@@ -19,7 +19,13 @@ public class DungeonManager {
         this.main = main;
         dungeons = new HashMap<>();
     }
+    public static void forceStart (String dungeon) {
+        Dungeon d = dungeons.get (dungeon);
+        if (d == null)
+            return;
 
+        d.start();
+    }
     public static boolean addPlayer (Player player, String dungeonName) {
         if (dungeonName == null) {
             player.sendMessage(ChatColor.RED + "Error: The dungeon name was null. Please contact an administrator.");
@@ -51,6 +57,20 @@ public class DungeonManager {
             return false;
         }
         return true;
+    }
+    public static ArrayList<Player> getAlivePlayers (String dungeon) {
+        Dungeon d = dungeons.get (dungeon);
+        if (d == null)
+            return new ArrayList<>();
+
+        return d.getAlivePlayers();
+    }
+    public static ArrayList<Player> getPlayers (String dungeon) {
+        Dungeon d = dungeons.get (dungeon);
+        if (d == null)
+            return new ArrayList<>();
+
+        return d.getPlayers();
     }
     public static boolean isValidDungeon (String dungeonName) {
         if (dungeonName == null)

@@ -124,7 +124,8 @@ public class DungeonMobs {
         }.runTaskTimer(plugin, 0, 10);
     }
 
-    public static void spawnDungeonBoss(Location location){
+    public static Entity spawnDungeonBoss(Location location){
+        String world = location.getWorld().getName();
         Zombie boss = location.getWorld().spawn(location, Zombie.class);
         boss.setCustomName(ChatColor.GOLD + "Knight of the Dungeons");
         boss.setCustomNameVisible(true);
@@ -135,24 +136,19 @@ public class DungeonMobs {
         AttributeInstance attributeAttack = bossAt.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
         attributeAttack.setBaseValue(40);
         boss.setSeed(1);
-        /*
+
         new BukkitRunnable(){
             public void run(){
                 if(!boss.isDead()) {
                     if(boss.getTarget() == null){
-                        for (Entity entity : boss.getNearbyEntities(40,40,40)){
-                            if (entity instanceof Player){
-                                if (DungeonStartCommand.alivePlayers.contains())
-                                    Player p = (Player) entity;
-                                boss.setTarget(p);
-                            }
-                        }
-                        for (Entity entity : boss.getNearbyEntities(5,5,5)){
+                        for (Entity entity : boss.getNearbyEntities(4,4,4)){
                             if (entity instanceof Player){
                                 Player p = (Player) entity;
-                                boss.setTarget(p);
+                                if (DungeonManager.getAlivePlayers(world).contains(p))
+                                    boss.setTarget(p);
                             }
                         }
+
                     }
                 } else {
                     cancel();
@@ -160,6 +156,8 @@ public class DungeonMobs {
             }
         }.runTaskTimer(plugin, 0, 10);
 
+        return boss;
+/*
         new BukkitRunnable(){
             public void run(){
                 if(!boss.isDead()) {
@@ -181,8 +179,7 @@ public class DungeonMobs {
                     cancel();
                 }
             }
-        }.runTaskTimer(plugin, 0, 10);
-*/
+        }.runTaskTimer(plugin, 0, 10);*/
     }
 
 }
