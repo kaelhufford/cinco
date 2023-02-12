@@ -6,6 +6,7 @@ import com.stigglespatch.main.Database.PlayerManager;
 import com.stigglespatch.main.Dungeon.*;
 import com.stigglespatch.main.Dungeon.Cuboids.Cuboid;
 import com.stigglespatch.main.Misc.CreativeCommand;
+import com.stigglespatch.main.Misc.Pendant;
 import com.stigglespatch.main.Misc.SMPCommand;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -16,6 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -28,6 +30,7 @@ public final class Main extends JavaPlugin implements Listener {
     public static ArrayList zombieSpawnRooms = new ArrayList<Cuboid>();
     public static boolean closedBossEntry = false;
 
+    NamespacedKey key = new NamespacedKey(this, "tag");
 
     private Database database;
     public static int roomNumber = 0;
@@ -40,6 +43,9 @@ public final class Main extends JavaPlugin implements Listener {
     private PlayerManager playerManager;
 
     DungeonManager dm = new DungeonManager(this);
+
+
+    public NamespacedKey getNamespacedKey () { return key; }
 
     @Override
     public void onEnable() {
@@ -68,7 +74,7 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new DungeonStartCommand(), this);
-
+        Bukkit.getPluginManager().registerEvents(new Pendant(this), this);
 
 
         /*
@@ -273,6 +279,12 @@ public final class Main extends JavaPlugin implements Listener {
                 DungeonMobs.spawnDungeonCreeper(block.getLocation().add(0,1,0));
             }
         }
+    }
+
+    @EventHandler
+    public void onPlayerJoin (PlayerJoinEvent e) {
+        Pendant.givePlayerItem(e.getPlayer());
+        Bukkit.getConsoleSender().sendMessage("Gave " + Pendant.getName() + " to " + e.getPlayer().getName());
     }
 
     @Override

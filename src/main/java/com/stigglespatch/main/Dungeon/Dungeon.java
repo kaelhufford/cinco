@@ -86,6 +86,7 @@ public class Dungeon {
                 if (room > currentRoom) {
                     currentRoom = room;
                     current = rooms.get(currentRoom);
+                    Bukkit.getConsoleSender().sendMessage("Player has advanced to the next room!");
                 }
                 rooms.get(index).update ();
                 Bukkit.getConsoleSender().sendMessage("Current: " + current.type.toString());
@@ -93,27 +94,6 @@ public class Dungeon {
             }
             ++room;
         }
-
-
-        /*if (current == null)
-            return;
-
-        current.update();
-        Bukkit.getConsoleSender().sendMessage("Current: " + current.type.toString());
-
-        if(!current.checkAllPlayers(current.getBoundary())) {
-            if (currentRoom != nextRoom && getNextRoom().checkAllPlayers(getNextRoom().getBoundary())) {
-                this.goToNextRoom();
-                Bukkit.getConsoleSender().sendMessage("Player has advanced to the next room!");
-            }
-            //for (Player p : dungeonManager.getAlivePlayers())
-            //    current.teleportRoomSpawn(p);
-        }
-        /*if (!current.isRoomActive()) {
-            this.goToNextRoom();
-
-
-        }*/
     }
 
     public void goToNextRoom () {
@@ -182,7 +162,7 @@ public class Dungeon {
     }
 
     public Material getBlockBelowPlayer (Player p) {
-        return getWorld().getBlockAt( (int) p.getLocation().getX(), 0, (int) p.getLocation().getZ()).getType();
+        return getWorld().getBlockAt( (int) p.getLocation().getX(), (int) p.getLocation().getZ() - 1, (int) p.getLocation().getZ()).getType();
     }
 
     public RoomType getPlayerRoom () {
@@ -486,13 +466,9 @@ public class Dungeon {
             playerQuit (p);
     }
 
-
-
-
     /**
      * Describes the variety of different types of rooms there can be.
      */
-
     protected enum RoomType {
         LOBBY,
         FILLER,
@@ -508,9 +484,6 @@ public class Dungeon {
         FINAL,
         NULL
     }
-
-
-
     /* This is going to be a long section of class definitions.
      * There will be a room definition for each type.
      */
