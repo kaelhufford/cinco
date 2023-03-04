@@ -1,26 +1,25 @@
 package com.stigglespatch.main;
 
+import com.stigglespatch.main.Custom.Enchants.Smelter;
+import com.stigglespatch.main.Custom.Items.Swords;
 import com.stigglespatch.main.Database.ConnectionListener;
 import com.stigglespatch.main.Database.Database;
 import com.stigglespatch.main.Database.PlayerManager;
 import com.stigglespatch.main.Dungeon.*;
 import com.stigglespatch.main.Dungeon.Cuboids.Cuboid;
 import com.stigglespatch.main.Misc.CreativeCommand;
-import com.stigglespatch.main.Misc.Pendant;
 import com.stigglespatch.main.Misc.SMPCommand;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.*;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -30,7 +29,6 @@ public final class Main extends JavaPlugin implements Listener {
     public static ArrayList zombieSpawnRooms = new ArrayList<Cuboid>();
     public static boolean closedBossEntry = false;
 
-    NamespacedKey key = new NamespacedKey(this, "tag");
 
     private Database database;
     public static int roomNumber = 0;
@@ -43,9 +41,6 @@ public final class Main extends JavaPlugin implements Listener {
     private PlayerManager playerManager;
 
     DungeonManager dm = new DungeonManager(this);
-
-
-    public NamespacedKey getNamespacedKey () { return key; }
 
     @Override
     public void onEnable() {
@@ -74,9 +69,125 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new DungeonStartCommand(), this);
-        Bukkit.getPluginManager().registerEvents(new Pendant(this), this);
+        Bukkit.getPluginManager().registerEvents(new Swords(), this);
+
+        Smelter as = new Smelter();
+        Bukkit.getPluginManager().registerEvents(as, this);
+        registerEnchantment(as);
+    }
+
+    private void registerEnchantment(Enchantment enchantment){
+        try {
+            Field field =Enchantment.class.getDeclaredField("acceptingNew");
+            field.setAccessible(true);
+            field.set(null, true);
+            Enchantment.registerEnchantment(enchantment);
+        } catch (NoSuchFieldException | IllegalAccessException e){
+            throw new RuntimeException(e);
+        }
+    }
+    private void getEntitiesInRoom(Cuboid collectionRoom) {
+        for(Block block : collectionRoom.getBlocks()){
+            if(block.getType().equals(Material.LIGHT_GRAY_CANDLE)){
+                DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,1,0));
+            } else if (block.getType().equals(Material.GRAY_CANDLE)){
+                DungeonMobs.spawnDungeonSkeleton(block.getLocation().add(0,1,0));
+            } else if (block.getType().equals(Material.CYAN_CANDLE)){
+                DungeonMobs.spawnDungeonCreeper(block.getLocation().add(0,1,0));
+            }
+        }
+    }
+
+    @Override
+    public void onDisable(){
+        database.disconnect();
+        //dSC.getPlayersList().clear();
+        //dSC.getAlivePlayers().clear();
+        //roomsFinished.clear();
+    }
+
+    @EventHandler
+    public void onBoomBoom(BlockExplodeEvent e){
+        if(e.getBlock().getWorld().equals("testdungeon")){
+            e.setCancelled(true);
+        }
+    }
 
 
+    @EventHandler
+    public void onDisconnect(PlayerQuitEvent e) {
+        /*Player p = e.getPlayer();
+        if (dSC.getPlayersList().contains(p)){
+            dSC.getPlayersList().remove(p);
+        }
+        if (dSC.getAlivePlayers().contains(p)){
+            dSC.getAlivePlayers().remove(p);
+        }*/
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) {
+        /*
+        Player p = (Player) e.getEntity();
+        if (dSC.getPlayersList().contains(p)){
+            p.setAllowFlight(true);
+            p.setFlying(true);
+            p.setInvisible(true);
+        }
+        if (dSC.getAlivePlayers().contains(p)){
+            dSC.getAlivePlayers().remove(p);
+        }
+
+        if (dSC.getAlivePlayers().size() == 0){
+            Bukkit.broadcastMessage(ChatColor.YELLOW +"The dungeon has been reset! Do /start-dungeon to begin!");
+            roomsFinished.clear();
+            for (Player player : dSC.getPlayersList()) {
+                player.setGameMode(GameMode.ADVENTURE);
+                player.setInvisible(false);
+                player.setAllowFlight(false);
+                player.setFlying(false);
+            }
+            dSC.getPlayersList().clear();
+            dSC.getAlivePlayers().clear();
+        }*/
+
+
+    }
+
+    public Database getDatabase() { return database; }
+    public PlayerManager getPlayerManager() { return playerManager; }
+
+}
+
+/* INSERT INTO DATABASE
+    PreparedStatement ps = database.getConnection().prepareStatement("INSERT INTO table (C1,C2,C4) VALUES (?,?,?);"); //insert
+            ps.setString(1,"banana");
+                    ps.setInt(2,2);
+                    ps.setBoolean(3,true);
+                    ps.executeUpdate();
+
+
+                    PreparedStatement ps2 = database.getConnection().prepareStatement("UPDATE table SET column = ? WHERE column2 = ?;"); //update
+                    ps2.setString(1,"banana");
+                    ps2.setInt(2,2);
+                    ps.executeUpdate();
+INSERT INTO DATABASE
+
+DELETE FROM DATABASE
+                    PreparedStatement ps3 = database.getConnection().prepareStatement("DELETE FROM table WHERE column =?"); //delete
+                    ps3.setString(1,"banana");
+                    ps.executeUpdate();
+DELETE FROM DATABASE
+
+RETRIEVE DATA FROM DATABASE
+                    //Example: replace UUID with * or UUID, RANK (to get all UUID/RANK whom it applies to | or everything that relates to people whom it is true for.)
+                    PreparedStatement ps4 = database.getConnection().prepareStatement("SELECT UUID FROM table WHERE column = ?"); //retrieve data from all people which the condition applies to
+                    ResultSet rs = ps4.executeQuery();
+                    while (rs.next()) {
+                    System.out.println(rs.getString("UUID"));
+                    }
+RETRIEVE DATA FROM DATABASE
+ */
         /*
         Cuboid entryCuboid = new Cuboid(
                 new Location(Bukkit.getWorld("testdungeon"),12, -35, 195),
@@ -268,112 +379,3 @@ public final class Main extends JavaPlugin implements Listener {
                 }
             }
         },0, timeBeforeNextSpawn);*/
-    }
-    private void getEntitiesInRoom(Cuboid collectionRoom) {
-        for(Block block : collectionRoom.getBlocks()){
-            if(block.getType().equals(Material.LIGHT_GRAY_CANDLE)){
-                DungeonMobs.spawnDungeonZombie(block.getLocation().add(0,1,0));
-            } else if (block.getType().equals(Material.GRAY_CANDLE)){
-                DungeonMobs.spawnDungeonSkeleton(block.getLocation().add(0,1,0));
-            } else if (block.getType().equals(Material.CYAN_CANDLE)){
-                DungeonMobs.spawnDungeonCreeper(block.getLocation().add(0,1,0));
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPlayerJoin (PlayerJoinEvent e) {
-        Pendant.givePlayerItem(e.getPlayer());
-        Bukkit.getConsoleSender().sendMessage("Gave " + Pendant.getName() + " to " + e.getPlayer().getName());
-    }
-
-    @Override
-    public void onDisable(){
-        database.disconnect();
-        //dSC.getPlayersList().clear();
-        //dSC.getAlivePlayers().clear();
-        //roomsFinished.clear();
-    }
-
-    @EventHandler
-    public void onBoomBoom(BlockExplodeEvent e){
-        if(e.getBlock().getWorld().equals("testdungeon")){
-            e.setCancelled(true);
-        }
-    }
-
-
-    @EventHandler
-    public void onDisconnect(PlayerQuitEvent e) {
-        /*Player p = e.getPlayer();
-        if (dSC.getPlayersList().contains(p)){
-            dSC.getPlayersList().remove(p);
-        }
-        if (dSC.getAlivePlayers().contains(p)){
-            dSC.getAlivePlayers().remove(p);
-        }*/
-    }
-
-    @EventHandler
-    public void onDeath(PlayerDeathEvent e) {
-        /*
-        Player p = (Player) e.getEntity();
-        if (dSC.getPlayersList().contains(p)){
-            p.setAllowFlight(true);
-            p.setFlying(true);
-            p.setInvisible(true);
-        }
-        if (dSC.getAlivePlayers().contains(p)){
-            dSC.getAlivePlayers().remove(p);
-        }
-
-        if (dSC.getAlivePlayers().size() == 0){
-            Bukkit.broadcastMessage(ChatColor.YELLOW +"The dungeon has been reset! Do /start-dungeon to begin!");
-            roomsFinished.clear();
-            for (Player player : dSC.getPlayersList()) {
-                player.setGameMode(GameMode.ADVENTURE);
-                player.setInvisible(false);
-                player.setAllowFlight(false);
-                player.setFlying(false);
-            }
-            dSC.getPlayersList().clear();
-            dSC.getAlivePlayers().clear();
-        }*/
-
-
-    }
-
-    public Database getDatabase() { return database; }
-    public PlayerManager getPlayerManager() { return playerManager; }
-
-}
-
-/* INSERT INTO DATABASE
-    PreparedStatement ps = database.getConnection().prepareStatement("INSERT INTO table (C1,C2,C4) VALUES (?,?,?);"); //insert
-            ps.setString(1,"banana");
-                    ps.setInt(2,2);
-                    ps.setBoolean(3,true);
-                    ps.executeUpdate();
-
-
-                    PreparedStatement ps2 = database.getConnection().prepareStatement("UPDATE table SET column = ? WHERE column2 = ?;"); //update
-                    ps2.setString(1,"banana");
-                    ps2.setInt(2,2);
-                    ps.executeUpdate();
-INSERT INTO DATABASE
-
-DELETE FROM DATABASE
-                    PreparedStatement ps3 = database.getConnection().prepareStatement("DELETE FROM table WHERE column =?"); //delete
-                    ps3.setString(1,"banana");
-                    ps.executeUpdate();
-DELETE FROM DATABASE
-
-RETRIEVE DATA FROM DATABASE
-                    //Example: replace UUID with * or UUID, RANK (to get all UUID/RANK whom it applies to | or everything that relates to people whom it is true for.)
-                    PreparedStatement ps4 = database.getConnection().prepareStatement("SELECT UUID FROM table WHERE column = ?"); //retrieve data from all people which the condition applies to
-                    ResultSet rs = ps4.executeQuery();
-                    while (rs.next()) {
-                    System.out.println(rs.getString("UUID"));
-                    }
-RETRIEVE DATA FROM DATABASE
- */
