@@ -9,8 +9,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -31,9 +34,9 @@ public class Pickaxes implements Listener {
         ItemStack item = new ItemStack(Material.NETHERITE_PICKAXE);
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName(ChatColor.GREEN + "Smurf's Handy Tool");
-        meta.setLore(Arrays.asList("When mining stone, coal ore, iron ore, lapis lazuli,",
-                                   "gold ore, diamond ore, and ancient debris - you get haste 2"));
+        meta.setDisplayName(ChatColor.AQUA + "Smurf's Handy Tool");
+        meta.setLore(Arrays.asList(ChatColor.GRAY + "When mining stone, coal ore, iron ore, lapis lazuli,",
+                                   "gold ore, diamond ore, and ancient debris - you get Haste 2"));
         meta.setLocalizedName("smurf_handy_tool");
         item.setItemMeta(meta);
         return item;
@@ -50,8 +53,8 @@ public class Pickaxes implements Listener {
         ItemStack item = new ItemStack(Material.GOLDEN_PICKAXE);
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName(ChatColor.GREEN + "The Warden's Weakness");
-        meta.setLore(Arrays.asList("Deals 200% more damage to the warden than any other",
+        meta.setDisplayName(ChatColor.BLUE + "The Warden's Weakness");
+        meta.setLore(Arrays.asList(ChatColor.GRAY + "Deals 200% more damage to the warden than any other",
                 "pickaxe.",
                 "",
                 "When paired with fortune III, the pickaxe allows",
@@ -85,27 +88,27 @@ public class Pickaxes implements Listener {
                 int level = p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
                 if (level == 3){
                     Material block = e.getBlock().getType();
-                    if (block.equals(Material.COAL_ORE)) {
+                    if (block.equals(Material.COAL_ORE) || block.equals(Material.DEEPSLATE_COAL_ORE)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.COAL, Math.multiplyExact(Math.addExact(rollNumber(0,2), rollNumber(3,4)), rollNumber(2,4))));
 
-                    } else if (block.equals(Material.DIAMOND_ORE)) {
+                    } else if (block.equals(Material.DIAMOND_ORE) || block.equals(Material.DEEPSLATE_DIAMOND_ORE)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.DIAMOND, Math.multiplyExact(Math.addExact(rollNumber(0,1), rollNumber(3,4)), rollNumber(2,4))));
 
-                    } else if (block.equals(Material.REDSTONE_ORE)) {
+                    } else if (block.equals(Material.REDSTONE_ORE) || block.equals(Material.DEEPSLATE_REDSTONE_ORE)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.REDSTONE, Math.multiplyExact(Math.addExact(rollNumber(0,2), rollNumber(3,4)), rollNumber(2,4))));
 
-                    } else if (block.equals(Material.EMERALD_ORE)) {
+                    } else if (block.equals(Material.EMERALD_ORE) || block.equals(Material.DEEPSLATE_EMERALD_ORE)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.EMERALD, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(2,4)), rollNumber(2,4))));
 
-                    } else if (block.equals(Material.LAPIS_ORE)) {
+                    } else if (block.equals(Material.LAPIS_ORE) || block.equals(Material.DEEPSLATE_LAPIS_ORE)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.LAPIS_LAZULI, Math.multiplyExact(Math.addExact(rollNumber(2,3), rollNumber(2,4)), rollNumber(2,4))));
@@ -128,9 +131,23 @@ public class Pickaxes implements Listener {
                     } else if (block.equals(Material.GLOWSTONE)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
-                                new ItemStack(Material.STONE, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
+                                new ItemStack(Material.GLOWSTONE_DUST, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
 
                     }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void breakingBlockEvent(PlayerInteractEvent e){
+        if (e.hasBlock() == true){
+            Player p = e.getPlayer();
+            if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("smurf_handy_tool")){
+                Material block = e.getMaterial();
+                if (block.equals(Material.STONE) || block.equals(Material.IRON_ORE) || block.equals(Material.COAL_ORE) || block.equals(Material.GOLD_ORE)
+                || block.equals(Material.LAPIS_ORE) || block.equals(Material.DIAMOND_ORE) || block.equals(Material.ANCIENT_DEBRIS)){
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 10, 100, false, false, false));
                 }
             }
         }

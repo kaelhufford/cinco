@@ -1,6 +1,8 @@
 package com.stigglespatch.main;
 
 import com.stigglespatch.main.Custom.Enchants.Smelter;
+import com.stigglespatch.main.Custom.Items.Bows.BoomBow;
+import com.stigglespatch.main.Custom.Items.Bows.GlowBow;
 import com.stigglespatch.main.Custom.Items.Swords;
 import com.stigglespatch.main.Database.ConnectionListener;
 import com.stigglespatch.main.Database.Database;
@@ -39,6 +41,8 @@ public final class Main extends JavaPlugin implements Listener {
     DungeonStartCommand dSC = new DungeonStartCommand();
     DungeonMobs dungeonMobs = new DungeonMobs(this);
     private PlayerManager playerManager;
+    public final NamespacedKey pendant = new NamespacedKey(this, "pendant");
+
 
     DungeonManager dm = new DungeonManager(this);
 
@@ -70,6 +74,8 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new DungeonStartCommand(), this);
         Bukkit.getPluginManager().registerEvents(new Swords(), this);
+        Bukkit.getPluginManager().registerEvents(new BoomBow(), this);
+        Bukkit.getPluginManager().registerEvents(new GlowBow(), this);
 
         Smelter as = new Smelter();
         Bukkit.getPluginManager().registerEvents(as, this);
@@ -156,6 +162,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     public Database getDatabase() { return database; }
     public PlayerManager getPlayerManager() { return playerManager; }
+    public NamespacedKey getNamespacedKey() { return pendant; }
 
 }
 

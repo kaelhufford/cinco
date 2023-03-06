@@ -26,6 +26,7 @@ public class Pendant implements Listener {
     private static final String pendantName = ChatColor.LIGHT_PURPLE + "Natalie's Pendant";
     private static ItemStack pendantItem = new ItemStack(Material.CHARCOAL);
 
+
     public Pendant (Main main) {
         this.main = main;
         ItemStack is = pendantItem;

@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
-import org.bukkit.entity.*;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -44,7 +43,7 @@ public class Swords implements Listener {
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(true);
         meta.setDisplayName(ChatColor.GREEN + "Emerald Dagger");
-        meta.setLore(Arrays.asList("Has a 10% chance to drop 1-3 Emeralds on a",
+        meta.setLore(Arrays.asList(ChatColor.GRAY + "Has a 10% chance to drop 1-3 Emeralds on a",
                 "kill. ",
                 "",
                 "When paired with Sharpness V, the dagger",
@@ -68,8 +67,8 @@ public class Swords implements Listener {
         ItemStack item = new ItemStack(Material.MAGMA_CREAM);
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName(ChatColor.GREEN + "Magma Cutlass");
-        meta.setLore(Arrays.asList("When right-clicked, if not on the 15-second",
+        meta.setDisplayName(ChatColor.GOLD + "Magma Cutlass");
+        meta.setLore(Arrays.asList(ChatColor.GRAY + "When right-clicked, if not on the 15-second",
                 "cooldown, will send a flaming arrow in the",
                 "direction you are facing.",
                 "",
