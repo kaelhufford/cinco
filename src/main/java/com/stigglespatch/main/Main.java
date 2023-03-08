@@ -73,6 +73,8 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new DungeonStartCommand(), this);
+        Bukkit.getPluginManager().registerEvents(new DungeonMobs(this), this);
+
         Bukkit.getPluginManager().registerEvents(new Swords(), this);
         Bukkit.getPluginManager().registerEvents(new BoomBow(), this);
         Bukkit.getPluginManager().registerEvents(new GlowBow(), this);
