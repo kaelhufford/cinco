@@ -27,6 +27,8 @@ public class DungeonMobs implements Listener {
     static Main plugin;
     private static final NamespacedKey necroArrow = new NamespacedKey(plugin, "necromancer_arrow");
     private static final NamespacedKey icedMonarchArrow = new NamespacedKey(plugin, "iced_monarch_arrow");
+    private static final NamespacedKey icedMonarchOPArrow = new NamespacedKey(plugin, "iced_monarch_op_arrow");
+
 
     public DungeonMobs(Main plugin){
         this.plugin = plugin;
@@ -427,11 +429,23 @@ public class DungeonMobs implements Listener {
                 if(!mob.isDead()) {
                     if(mob.getTarget() != null) {
                         if (attackNumber >= 7) { // OP ATTACK
+                            mob.setAI(false);
+                            mob.setInvulnerable(true);
+                            mob.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 20*3, 1, true, false, true));
+                            mob.setGlowing(true);
+                            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                                mob.setAI(true);
+                                mob.setInvulnerable(false);
+                                mob.setGlowing(false);
+                                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                                    shootGroupOfIce(mob);
+                                    shootGroupOfArrows(mob);
 
-                            //GLOW AND FLOAT
-                            // WAIT 3 SECONDs
-                            //DO ATTACK THINGIES
+                                    // DO ATTACKS
+                                }, 9);
+                            }, 65);
 
+                            mob.setInvulnerable(false);
                         } else if (attackNumber >= 5 && attackNumber <=6) { //FREEZE ARROWS
                             for (Entity arrowAttackPlayer : mob.getNearbyEntities(40, 40, 40)) {
                                 Location loc = arrowAttackPlayer.getLocation();
@@ -487,6 +501,92 @@ public class DungeonMobs implements Listener {
         }
     }
 
+    public static void shootGroupOfIce(Entity entity) {
+        shootFallingIce(entity, 1,0,2);
+        shootFallingIce(entity, -1,0,2);
+        shootFallingIce(entity, 2,0,2);
+        shootFallingIce(entity, -2,0,2);
+
+        shootFallingIce(entity, 1,0,1);
+        shootFallingIce(entity, -1,0,1);
+        shootFallingIce(entity, 2,0,1);
+        shootFallingIce(entity, -2,0,1);
+
+        shootFallingIce(entity, 1,0,0);
+        shootFallingIce(entity, -1,0,0);
+        shootFallingIce(entity, 2,0,0);
+        shootFallingIce(entity, -2,0,0);
+
+        shootFallingIce(entity, 0,0,1);
+        shootFallingIce(entity, 0,0,-1);
+        shootFallingIce(entity, 0,0,2);
+        shootFallingIce(entity, 0,0,-2);
+
+        shootFallingIce(entity, 1,0,-2);
+        shootFallingIce(entity, -1,0,-2);
+        shootFallingIce(entity, 2,0,-2);
+        shootFallingIce(entity, -2,0,-2);
+
+        shootFallingIce(entity, 1,0,-1);
+        shootFallingIce(entity, -1,0,-1);
+        shootFallingIce(entity, 2,0,-1);
+        shootFallingIce(entity, -2,0,-1);
+    }
+    public static void shootGroupOfArrows(Entity entity) {
+        shootIceArrow(entity, 1,0,2);
+        shootIceArrow(entity, -1,0,2);
+        shootIceArrow(entity, 2,0,2);
+        shootIceArrow(entity, -2,0,2);
+
+        shootIceArrow(entity, 1,0,1);
+        shootIceArrow(entity, -1,0,1);
+        shootIceArrow(entity, 2,0,1);
+        shootIceArrow(entity, -2,0,1);
+
+        shootIceArrow(entity, 1,0,0);
+        shootIceArrow(entity, -1,0,0);
+        shootIceArrow(entity, 2,0,0);
+        shootIceArrow(entity, -2,0,0);
+
+        shootIceArrow(entity, 0,0,1);
+        shootIceArrow(entity, 0,0,-1);
+        shootIceArrow(entity, 0,0,2);
+        shootIceArrow(entity, 0,0,-2);
+
+        shootIceArrow(entity, 1,0,-2);
+        shootIceArrow(entity, -1,0,-2);
+        shootIceArrow(entity, 2,0,-2);
+        shootIceArrow(entity, -2,0,-2);
+
+        shootIceArrow(entity, 1,0,-1);
+        shootIceArrow(entity, -1,0,-1);
+        shootIceArrow(entity, 2,0,-1);
+        shootIceArrow(entity, -2,0,-1);
+    }
+    public static void shootFallingIce(Entity entity, int vectorX, int vectorY, int vectorZ) {
+        FallingBlock ice = entity.getWorld().spawn(entity.getLocation(), FallingBlock.class);
+        Vector iceVector = entity.getLocation().getDirection();
+
+        iceVector.setX(vectorX);
+        iceVector.setY(vectorY);
+        iceVector.setZ(vectorZ);
+
+        ice.setVelocity(iceVector);
+    }
+
+    public static void shootIceArrow(Entity entity, int vectorX, int vectorY, int vectorZ) {
+        Arrow arrow = entity.getWorld().spawn(entity.getLocation(), Arrow.class);
+        arrow.getPersistentDataContainer().set(icedMonarchOPArrow, PersistentDataType.STRING, "iced_monarch_op_arrow");
+        Vector vector = entity.getLocation().getDirection();
+
+        vector.setX(vectorX);
+        vector.setY(vectorY);
+        vector.setZ(vectorZ);
+
+        arrow.setVelocity(vector);
+    }
+
+
 
     @EventHandler
     public void onArrowAttack(ProjectileHitEvent e){
@@ -494,7 +594,6 @@ public class DungeonMobs implements Listener {
             if (e.getHitEntity() instanceof Player){
                 Player p = (Player) e.getHitEntity();
                 PersistentDataContainer container = e.getEntity().getPersistentDataContainer();
-                if (!container.has(necroArrow, PersistentDataType.STRING)) {} else if (!container.has(icedMonarchArrow, PersistentDataType.STRING)) { return; }
                 if (container.get(necroArrow, PersistentDataType.STRING).equals("necromancer_arrow")) {
                     p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20*15, 1, true, false, true));
                     p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20*10, 1, true, false, true));
@@ -503,6 +602,12 @@ public class DungeonMobs implements Listener {
                     //TODO --> ADD THE ICED MONARCH ARROWS
                     p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 20*10, 1, true, false, true));
                     p.setFreezeTicks(20*15);
+                } else if (container.get(icedMonarchOPArrow, PersistentDataType.STRING).equals("iced_monarch_op_arrow")){
+                    //TODO --> ADD THE ICED MONARCH ARROWS
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 20*10, 1, true, false, true));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.HARM, 20, 2, true, false, true));
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20*10, 1, true, false, true));
+
                 }
             }
         }
