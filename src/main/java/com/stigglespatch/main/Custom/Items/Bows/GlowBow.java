@@ -1,6 +1,7 @@
 package com.stigglespatch.main.Custom.Items.Bows;
 
 import com.stigglespatch.main.Main;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.*;
@@ -29,7 +30,7 @@ public class GlowBow implements Listener {
         ItemMeta meta = bow.getItemMeta();
         meta.setUnbreakable(true);
         meta.setDisplayName(("Recon Bow"));
-        meta.setLore(Arrays.asList("This bow scans nearby entities within a "));
+        meta.setLore(Arrays.asList(ChatColor.GRAY + "This bow scans nearby entities within a 10x10x10 block", "radius, but uses 10 experience levels!"));
         meta.setLocalizedName("glow_bow");
         bow.setItemMeta(meta);
         return bow;
@@ -38,19 +39,18 @@ public class GlowBow implements Listener {
     public void onShoot(EntityShootBowEvent e){
         if(!(e.getEntity() instanceof Player)) return;
         if (e.getBow().getItemMeta().getLocalizedName().equals("glow_bow")){
-            e.getProjectile().getPersistentDataContainer().set(glowKey, PersistentDataType.STRING, "boom_arrow");
+            e.getProjectile().getPersistentDataContainer().set(glowKey, PersistentDataType.STRING, "glow_arrow");
         }
     }
 
     @EventHandler
-    public void onDamage(ProjectileHitEvent e){
-        if (e.getHitEntity() == null) { return; }
+    public void onLand(ProjectileHitEvent e){
         PersistentDataContainer container = e.getEntity().getPersistentDataContainer();
         if (!container.has(glowKey, PersistentDataType.STRING)) return;
-        if (container.get(glowKey, PersistentDataType.STRING).equals("glow_bow")) {
-            for (Entity entity : e.getEntity().getNearbyEntities(10,10,10)){
+        if (container.get(glowKey, PersistentDataType.STRING).equals("glow_arrow")) {
+            for (Entity entity : e.getEntity().getNearbyEntities(20,20,20)){
                 if (entity instanceof Mob){
-                    ((Mob) entity).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 10, 10, true, false, true));
+                    ((Mob) entity).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 10, true, false, true));
                 }
             }
         }

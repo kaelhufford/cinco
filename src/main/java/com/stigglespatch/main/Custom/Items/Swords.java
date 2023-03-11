@@ -106,7 +106,7 @@ public class Swords implements Listener {
         if (e.getEntity().getKiller() instanceof Player){
             Player p = e.getEntity().getKiller();
             if (p.getInventory().getItemInMainHand().equals(Material.EMERALD)
-            && p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("emerald_dagger")){
+                    && p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("emerald_dagger")){
                 if (rollNumber(0,11) == 1){
                     int emeralds = rollNumber(0,5);
                     p.getInventory().addItem(new ItemStack(Material.EMERALD, emeralds));
@@ -136,7 +136,7 @@ public class Swords implements Listener {
                 if (isMagmaCutlass(e.getItem())) {
                     Location loc = e.getPlayer().getLocation();
                     Vector dir = loc.getDirection();
-                    Arrow arrow = e.getPlayer().getWorld().spawn(loc.add(0, 1, 0), Arrow.class);
+                    Arrow arrow = e.getPlayer().getWorld().spawn(loc.add(0, 2, 0), Arrow.class);
                     arrow.setFireTicks(20 * 10);
                     arrow.setVisualFire(true);
                     double speed = 1.5;

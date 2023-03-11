@@ -36,7 +36,7 @@ public class Pickaxes implements Listener {
         meta.setUnbreakable(true);
         meta.setDisplayName(ChatColor.AQUA + "Smurf's Handy Tool");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "When mining stone, coal ore, iron ore, lapis lazuli,",
-                                   "gold ore, diamond ore, and ancient debris - you get Haste 2"));
+                "gold ore, diamond ore, and ancient debris - you get Haste 2"));
         meta.setLocalizedName("smurf_handy_tool");
         item.setItemMeta(meta);
         return item;
@@ -75,7 +75,7 @@ public class Pickaxes implements Listener {
                     && e.getEntity().getType().equals(EntityType.WARDEN)){
 
                 int experience = p.getExpToLevel();
-                e.setDamage(experience * .5);
+                e.setDamage(experience);
             }
         }
     }
@@ -121,7 +121,7 @@ public class Pickaxes implements Listener {
                     } else if (block.equals(Material.MELON)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
-                                new ItemStack(Material.MELON, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
+                                new ItemStack(Material.MELON_SLICE, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.CLAY)) {
                         e.setDropItems(false);
@@ -143,11 +143,12 @@ public class Pickaxes implements Listener {
     public void breakingBlockEvent(PlayerInteractEvent e){
         if (e.hasBlock() == true){
             Player p = e.getPlayer();
+            if (e.getPlayer().getInventory().getItemInMainHand() == null) {return;}
             if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("smurf_handy_tool")){
                 Material block = e.getMaterial();
                 if (block.equals(Material.STONE) || block.equals(Material.IRON_ORE) || block.equals(Material.COAL_ORE) || block.equals(Material.GOLD_ORE)
-                || block.equals(Material.LAPIS_ORE) || block.equals(Material.DIAMOND_ORE) || block.equals(Material.ANCIENT_DEBRIS)){
-                    p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 10, 100, false, false, false));
+                        || block.equals(Material.LAPIS_ORE) || block.equals(Material.DIAMOND_ORE) || block.equals(Material.ANCIENT_DEBRIS)){
+                    p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 100, 100, false, false, false));
                 }
             }
         }

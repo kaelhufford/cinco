@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -24,15 +25,11 @@ import java.util.Random;
 
 public class DungeonMobs implements Listener {
 
-    static Main plugin;
+    private static final Main plugin = Main.getPlugin(Main.class);
     private static final NamespacedKey necroArrow = new NamespacedKey(plugin, "necromancer_arrow");
     private static final NamespacedKey icedMonarchArrow = new NamespacedKey(plugin, "iced_monarch_arrow");
     private static final NamespacedKey icedMonarchOPArrow = new NamespacedKey(plugin, "iced_monarch_op_arrow");
 
-
-    public DungeonMobs(Main plugin){
-        this.plugin = plugin;
-    }
     private static int rollNumber(int min, int max){
         Random rand = new Random();
         int randomNumber = rand.nextInt(max) + min;
@@ -263,15 +260,13 @@ public class DungeonMobs implements Listener {
                                     guard.setTarget(boss.getTarget());
                                 }
                             } else {
-                                if (DungeonStartCommand.alivePlayers.contains(entity)) {
-                                    Player p = (Player) entity;
-                                    p.getLocation().getWorld().strikeLightning(p.getLocation());
-                                    Blaze blaze = p.getLocation().add(0,3,0).getWorld().spawn(p.getLocation().add(0,3,0), Blaze.class);
-                                    Attributable blazeAt = blaze;
-                                    AttributeInstance attributeHealth = blazeAt.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-                                    attributeHealth.setBaseValue(15);
-                                    blaze.setHealth(15);
-                                }
+                                Entity p = entity;
+                                p.getLocation().getWorld().strikeLightning(p.getLocation());
+                                Blaze blaze = p.getLocation().add(0,3,0).getWorld().spawn(p.getLocation().add(0,3,0), Blaze.class);
+                                Attributable blazeAt = blaze;
+                                AttributeInstance attributeHealth = blazeAt.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+                                attributeHealth.setBaseValue(15);
+                                blaze.setHealth(15);
                             }
                         }
                     }
@@ -351,15 +346,10 @@ public class DungeonMobs implements Listener {
                             for (Entity arrowAttackPlayer : boss.getNearbyEntities(40, 40, 40)) {
                                 Location loc = arrowAttackPlayer.getLocation();
                                 Vector dir = loc.getDirection();
-                                new BukkitRunnable(){
-                                    public void run() {
-                                        Arrow arrow = boss.getTarget().getWorld().spawn(loc.add(0, 3, 0), Arrow.class);
-                                        arrow.getPersistentDataContainer().set(necroArrow, PersistentDataType.STRING, "necromancer_arrow");
-                                        double speed = 2.5;
-                                        arrow.setVelocity(dir.multiply(speed));
-                                    }
-
-                                }.runTaskTimer(plugin, 0, 15);
+                                Arrow arrow = boss.getTarget().getWorld().spawn(loc.add(0, 3, 0), Arrow.class);
+                                arrow.getPersistentDataContainer().set(necroArrow, PersistentDataType.STRING, "necromancer_arrow");
+                                double speed = 2.5;
+                                arrow.setVelocity(dir.multiply(speed));
                             }
                         } else {
                             for (Entity lightningAttackPlayer : boss.getNearbyEntities(40, 40, 40)) {
@@ -426,9 +416,11 @@ public class DungeonMobs implements Listener {
         new BukkitRunnable(){
             public void run(){
                 int attackNumber = rollNumber(1,7);
+                System.out.println(attackNumber);
                 if(!mob.isDead()) {
                     if(mob.getTarget() != null) {
                         if (attackNumber >= 7) { // OP ATTACK
+                            System.out.println("OP ATTACK");
                             mob.setAI(false);
                             mob.setInvulnerable(true);
                             mob.addPotionEffect(new PotionEffect(PotionEffectType.LEVITATION, 20*3, 1, true, false, true));
@@ -444,29 +436,28 @@ public class DungeonMobs implements Listener {
                                     // DO ATTACKS
                                 }, 9);
                             }, 65);
-
-                            mob.setInvulnerable(false);
                         } else if (attackNumber >= 5 && attackNumber <=6) { //FREEZE ARROWS
+                            System.out.println("FREEZE ARROWS");
                             for (Entity arrowAttackPlayer : mob.getNearbyEntities(40, 40, 40)) {
                                 Location loc = arrowAttackPlayer.getLocation();
                                 Vector dir = loc.getDirection();
-                                new BukkitRunnable(){
-                                    public void run() {
-                                        Arrow arrow = mob.getTarget().getWorld().spawn(loc.add(0, 3, 0), Arrow.class);
-                                        arrow.getPersistentDataContainer().set(icedMonarchArrow, PersistentDataType.STRING, "iced_monarch_arrow");
-                                        double speed = 2.5;
-                                        arrow.setVelocity(dir.multiply(speed));
-                                    }
-
-                                }.runTaskTimer(plugin, 0, 10);
+                                Arrow arrow = mob.getTarget().getWorld().spawn(loc.add(0, 3, 0), Arrow.class);
+                                arrow.getPersistentDataContainer().set(icedMonarchArrow, PersistentDataType.STRING, "iced_monarch_arrow");
+                                double speed = 2.5;
+                                arrow.setVelocity(dir.multiply(speed));
                             }
 
                         } else if (attackNumber >= 3 && attackNumber <=4) { //ICE CHUNKS
+                            System.out.println("ICE CHUNKS");
+                            /*
                             for (Entity player : mob.getNearbyEntities(40, 40, 40)) {
                                 spawnFallingIce(player);
                             }
 
+                             */
+
                         } else { //STRAY SPAWN
+                            System.out.println("STRAY SPAWN");
                             spawnDungeonStray(mob.getLocation());
                             spawnDungeonStray(mob.getLocation());
                             spawnDungeonStray(mob.getLocation());
@@ -477,7 +468,7 @@ public class DungeonMobs implements Listener {
                     cancel();
                 }
             }
-        }.runTaskTimer(plugin, 0, 20*15);
+        }.runTaskTimer(plugin, 0, 20*20);
     }
 
     public static void spawnFallingIce(Entity p) {
@@ -496,7 +487,7 @@ public class DungeonMobs implements Listener {
                 new Location(Bukkit.getWorld(worldName),bottomX, bottomY, bottomZ));
         for (Block block : iceChuncks.getBlocks()){
             if(block.isEmpty()){
-                block.getWorld().spawnFallingBlock(block.getLocation(), Material.ICE.createBlockData());
+                block.getWorld().spawnFallingBlock(block.getLocation(), Material.BLUE_ICE.createBlockData());
             }
         }
     }
@@ -533,45 +524,42 @@ public class DungeonMobs implements Listener {
         shootFallingIce(entity, -2,0,-1);
     }
     public static void shootGroupOfArrows(Entity entity) {
-        shootIceArrow(entity, 1,0,2);
-        shootIceArrow(entity, -1,0,2);
-        shootIceArrow(entity, 2,0,2);
-        shootIceArrow(entity, -2,0,2);
+        shootIceArrow(entity, 1,1,2);
+        shootIceArrow(entity, -1,1,2);
+        shootIceArrow(entity, 2,1,2);
+        shootIceArrow(entity, -2,1,2);
 
-        shootIceArrow(entity, 1,0,1);
-        shootIceArrow(entity, -1,0,1);
-        shootIceArrow(entity, 2,0,1);
-        shootIceArrow(entity, -2,0,1);
+        shootIceArrow(entity, 1,1,1);
+        shootIceArrow(entity, -1,1,1);
+        shootIceArrow(entity, 2,1,1);
+        shootIceArrow(entity, -2,1,1);
 
-        shootIceArrow(entity, 1,0,0);
-        shootIceArrow(entity, -1,0,0);
-        shootIceArrow(entity, 2,0,0);
-        shootIceArrow(entity, -2,0,0);
+        shootIceArrow(entity, 1,1,0);
+        shootIceArrow(entity, -1,1,0);
+        shootIceArrow(entity, 2,1,0);
+        shootIceArrow(entity, -2,1,0);
 
-        shootIceArrow(entity, 0,0,1);
-        shootIceArrow(entity, 0,0,-1);
-        shootIceArrow(entity, 0,0,2);
-        shootIceArrow(entity, 0,0,-2);
+        shootIceArrow(entity, 0,1,1);
+        shootIceArrow(entity, 0,1,-1);
+        shootIceArrow(entity, 0,1,2);
+        shootIceArrow(entity, 0,1,-2);
 
-        shootIceArrow(entity, 1,0,-2);
-        shootIceArrow(entity, -1,0,-2);
-        shootIceArrow(entity, 2,0,-2);
-        shootIceArrow(entity, -2,0,-2);
+        shootIceArrow(entity, 1,1,-2);
+        shootIceArrow(entity, -1,1,-2);
+        shootIceArrow(entity, 2,1,-2);
+        shootIceArrow(entity, -2,1,-2);
 
-        shootIceArrow(entity, 1,0,-1);
-        shootIceArrow(entity, -1,0,-1);
-        shootIceArrow(entity, 2,0,-1);
-        shootIceArrow(entity, -2,0,-1);
+        shootIceArrow(entity, 1,1,-1);
+        shootIceArrow(entity, -1,1,-1);
+        shootIceArrow(entity, 2,1,-1);
+        shootIceArrow(entity, -2,1,-1);
     }
-    public static void shootFallingIce(Entity entity, int vectorX, int vectorY, int vectorZ) {
-        FallingBlock ice = entity.getWorld().spawn(entity.getLocation(), FallingBlock.class);
-        Vector iceVector = entity.getLocation().getDirection();
+    public static void shootFallingIce(Entity entity, int locationX, int locationY, int locationZ) {
+        FallingBlock ice = entity.getWorld().spawnFallingBlock(entity.getLocation(), Material.BLUE_ICE.createBlockData());
 
-        iceVector.setX(vectorX);
-        iceVector.setY(vectorY);
-        iceVector.setZ(vectorZ);
-
-        ice.setVelocity(iceVector);
+        ice.getLocation().setX(locationX);
+        ice.getLocation().setZ(locationZ);
+        ice.getLocation().setY(locationY);
     }
 
     public static void shootIceArrow(Entity entity, int vectorX, int vectorY, int vectorZ) {
@@ -586,14 +574,16 @@ public class DungeonMobs implements Listener {
         arrow.setVelocity(vector);
     }
 
-
-
     @EventHandler
     public void onArrowAttack(ProjectileHitEvent e){
         if (e.getHitEntity() != null){
             if (e.getHitEntity() instanceof Player){
                 Player p = (Player) e.getHitEntity();
                 PersistentDataContainer container = e.getEntity().getPersistentDataContainer();
+                if (!container.has(necroArrow, PersistentDataType.STRING) ||
+                        !container.has(icedMonarchArrow, PersistentDataType.STRING) ||
+                        !container.has(icedMonarchOPArrow, PersistentDataType.STRING)) {return;}
+
                 if (container.get(necroArrow, PersistentDataType.STRING).equals("necromancer_arrow")) {
                     p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20*15, 1, true, false, true));
                     p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20*10, 1, true, false, true));
@@ -623,5 +613,4 @@ public class DungeonMobs implements Listener {
             }
         }
     }
-
 }
