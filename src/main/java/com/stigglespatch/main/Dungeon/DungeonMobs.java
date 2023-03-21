@@ -211,7 +211,7 @@ public class DungeonMobs implements Listener {
         }.runTaskTimer(plugin, 0, 10);
     }
 
-    public static void spawnKnightBoss(Location location){
+    public static Zombie spawnKnightBoss(Location location){
         Zombie boss = location.getWorld().spawn(location, Zombie.class);
         boss.setCustomName(ChatColor.GOLD + "Knight of the Dungeons");
         boss.setCustomNameVisible(true);
@@ -275,9 +275,10 @@ public class DungeonMobs implements Listener {
                 }
             }
         }.runTaskTimer(plugin, 0, 20*10);
+        return boss;
     }
 
-    public static void spawnDreadedNecromancer(Location location){
+    public static WitherSkeleton spawnDreadedNecromancer(Location location){
         WitherSkeleton boss = location.getWorld().spawn(location, WitherSkeleton.class);
         boss.setCustomName(ChatColor.BLUE + "Dreaded Necromancer");
         boss.setCustomNameVisible(true);
@@ -364,10 +365,10 @@ public class DungeonMobs implements Listener {
                 }
             }
         }.runTaskTimer(plugin, 0, 20*10);
-
+        return boss;
     }
 
-    public static void spawnIcedMonarch(Location location){
+    public static Stray spawnIcedMonarch(Location location){
         Stray mob = location.getWorld().spawn(location, Stray.class);
         mob.setCustomName(ChatColor.AQUA + "Iced Monarch");
         mob.setCustomNameVisible(true);
@@ -469,6 +470,7 @@ public class DungeonMobs implements Listener {
                 }
             }
         }.runTaskTimer(plugin, 0, 20*20);
+        return mob;
     }
 
     public static void spawnFallingIce(Entity p) {
