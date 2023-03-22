@@ -2,7 +2,6 @@ package com.stigglespatch.main.Dungeon;
 
 import com.stigglespatch.main.Dungeon.Cuboids.Cuboid;
 import com.stigglespatch.main.Main;
-import jdk.internal.icu.impl.BMPSet;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -11,13 +10,18 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.PlayerInventory;
-
 import java.util.*;
 
-public class Dungeon {
+public class Dungeon implements Listener {
 
-
+    private static int BASE_DIFFICULTY = 1;
+    private static int difficulty = 1;
     public static final int MAX_PLAYER_COUNT = 4;
     private int dungeonID;
     //World spawn-- This should not change.
@@ -26,59 +30,250 @@ public class Dungeon {
     //But in many cases, it probably will be.
     private Location playerSpawn;
     //Stores player's main world location before joining the dungeon world.
-    private Map<UUID, Location> oldPlayerLocation;
+    private final Map<UUID, Location> oldPlayerLocation;
     //Stores player's main world inventory before joining the dungeon world.
-    private Map<UUID, PlayerInventory> oldPlayerInventory;
+    private final Map<UUID, PlayerInventory> oldPlayerInventory;
     //RECRUITING or STARTED
     private DungeonState state;
     //Manages the games states, rooms, and timers
-    private DungeonStartManager dungeonManager;
-    private List<UUID> playerID;
-    private List<Cuboid> dungeonCuboids;
-    public static ArrayList roomsFinished = new ArrayList<DungeonRoom>();
+    //private DungeonStartManager dungeonManager;
+    private final List<UUID> playerID;
+    //private List<Cuboid> dungeonCuboids;
+    public static ArrayList<DungeonRoom> roomsFinished;
     private int currentRoom;
     private int nextRoom;
     private DungeonRoom current;
     protected List<DungeonRoom> rooms;
     private boolean active;
-    private Main main;
+    private final Main main;
 
-    public Dungeon(Main main, int dungeonID, Location worldSpawn) {
+    private final World world;
 
-        this.main = main;
-        this.dungeonID = dungeonID;
-        this.worldSpawn = worldSpawn;
-        this.playerSpawn = worldSpawn; //Note: By default, playerSpawn will be equal to worldSpawn. It should be like
+    //DUNGEON START MANAGER VARS
+    private final ArrayList<Player> players;
+    private final ArrayList<Player> alivePlayers;
+    private int countdown = 0;
+    private int timer = 0;
+    public boolean timerActive = false;
+    private boolean started;
+    private final int everySecondTaskID;
+
+    public Dungeon(Main main, int id, Location world_spawn) {
+        countdown = 30;
+        players = new ArrayList<>();
+        alivePlayers = new ArrayList<>();
+        started = false;
+
+        //END OF DUNGEON START MANAGER CONSTRUCTOR
+
+
+        dungeonID = id;
+        worldSpawn = world_spawn;
+        world = worldSpawn.getWorld();
+        //Note: By default, playerSpawn will be equal to worldSpawn. It should be like
         //      this to start. After the dungeon begins, this has potential to change,
         //      but unlikely.
-        this.state = DungeonState.RECRUITING;
-        this.playerID = new ArrayList<>();
-        this.dungeonCuboids = new ArrayList<>();
-        this.oldPlayerLocation = new HashMap<>();
-        this.oldPlayerInventory = new HashMap<>();
+        playerSpawn = worldSpawn;
+        state = DungeonState.RECRUITING;
+        playerID = new ArrayList<>();
+        oldPlayerLocation = new HashMap<>();
+        oldPlayerInventory = new HashMap<>();
         rooms = new ArrayList<>();
         active = false;
 
+        roomsFinished = new ArrayList<>();
         //Initialize Rooms...
-
         setCurrentRoom(0);
         setNextRoom(1);
-        //This will be uncommented when dungeonManager functionality is finished.
-        this.dungeonManager = new DungeonStartManager(this, 30);
-        Bukkit.getPluginManager().registerEvents(this.dungeonManager, main);
+
+        this.main = main;
+        /* this::everySecond() is equivalent to () -> everySecond() */
+        everySecondTaskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(main, this::everySecond, 0L, 20L);
+        Bukkit.getPluginManager().registerEvents(this, main);
     }
 
-
     public Main getMain () { return main; }
+
+    public void cancelTask () { Bukkit.getScheduler().cancelTask (everySecondTaskID); }
     /**
      * Teleport the player to the world's player spawn point.
      *
      * @param player The player to be spawned.
      */
-    public void spawnPlayer(Player player) {
-        player.teleport(playerSpawn);
+    public void spawnPlayer(Player player) { player.teleport(playerSpawn); }
+
+    //From DUNGEON START MANAGER
+    public void everySecond () {
+        if (alivePlayers.isEmpty())
+            return;
+
+        if (state == DungeonState.RECRUITING) {
+            if (countdown > 0)
+                --countdown;
+
+            if (countdown % 10 == 0 || countdown <= 5)
+                sendPlayersMessage(ChatColor.YELLOW + "Dungeon begins in " + countdown);
+
+            if (countdown == 0)
+                start();
+        }
+        else if (state.equals(DungeonState.STARTED)) {
+            if (timerActive) {
+                if (timer == 0)
+                    started = true;
+                ++timer;
+            }
+            Bukkit.getConsoleSender().sendMessage("Time active: " + timer);
+            if (alivePlayers.isEmpty()) {
+                reset ();
+                timerActive = false;
+
+                this.getPlayers().clear();
+                this.getAlivePlayers().clear();
+            }
+            //Update dungeon logic
+            update();
+        }
+        else if (state.equals(DungeonState.FAILED))
+            Bukkit.getScheduler().cancelTask(everySecondTaskID);
     }
 
+    /** Updates the player count and executes join functions
+     *
+     * @param e The player join server event
+     */
+    @EventHandler
+    public void onChangeWorld (PlayerChangedWorldEvent e) {
+        if (true)
+            return;
+        Player p = e.getPlayer();
+        //Player is joining the dungeon world
+        if (p.getWorld ().getName().equals(world.getName()))
+            join (p);
+        //Player is leaving the dungeon world
+        else if (e.getFrom().getName().equals(world.getName()))
+            leave (p);
+    }
+    public void join (Player p) {
+        //dungeon.playerJoin(p);
+        Bukkit.getServer().getConsoleSender().sendMessage("Dungeon: " + p.getName() + " has joined!");
+        oldPlayerLocation.put(p.getUniqueId(), p.getLocation());
+        oldPlayerInventory.put(p.getUniqueId(), p.getInventory());
+
+        this.addPlayerID(p);
+        this.spawnPlayer(p);
+
+        p.setGameMode(GameMode.ADVENTURE);
+        p.setInvisible(false);
+        p.setAllowFlight(false);
+        p.setFlying(false);
+
+        if (state.equals(DungeonState.RECRUITING)) {
+            if (players.isEmpty())
+                countdown = 30;
+
+            if (getPlayerCount() == getMaxPlayerCount() && countdown >= 0)
+                countdown = 10;
+        }
+        this.players.add(p);
+        this.alivePlayers.add(p);
+    }
+    public void leave (Player p) {
+        p.setGameMode(GameMode.SURVIVAL);
+        p.setInvisible(false);
+        p.setAllowFlight(false);
+        p.setFlying(false);
+
+        if (getState().equals(DungeonState.RECRUITING)) {
+            //If a player leaves, allow for 30 more seconds for players to join.
+            if (countdown >= 0)
+                countdown = 30;
+        }
+        this.getPlayers().remove(p);
+        this.getAlivePlayers().remove(p);
+
+        this.removePlayerID(p);
+        Location oldLocation = oldPlayerLocation.remove(p.getUniqueId());
+        PlayerInventory inv = oldPlayerInventory.remove(p.getUniqueId());
+        //Clear current inventory
+        p.getInventory().clear();
+
+        //Set old inventory
+        p.getInventory().setContents(inv.getContents());
+        p.getInventory().setArmorContents(inv.getArmorContents());
+        p.getInventory().setExtraContents(inv.getExtraContents());
+
+        //TP player back to their previous location
+        p.teleport(oldLocation);
+        //dungeon.playerQuit(p);
+    }
+
+    @EventHandler
+    public void onPlayerDeath (PlayerDeathEvent e) {
+        Player p = e.getEntity();
+        if (!p.getWorld().getName().equals(getWorld().getName()))
+            return;
+
+        alivePlayers.remove (p);
+
+        if (this.getPlayers().contains(p)) {
+            p.setAllowFlight(true);
+            p.setFlying(true);
+            p.setInvisible(true);
+        }
+        this.getAlivePlayers().remove(p);
+
+        if (this.getAlivePlayers().isEmpty())
+            failed();
+    }
+    @EventHandler
+    public void onPlayerQuit (PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        if (!p.getWorld().getName().equals(world.getName()))
+            return;
+
+        //if (isStarted())
+        playerQuit(p);
+    }
+    public void sendPlayersMessage (String msg) {
+        for (Player p : players)
+            p.sendMessage(msg);
+    }
+
+    public int getTime () { return timer; }
+
+    public int getCountdown () { return countdown; }
+
+    public boolean isStarted () { return started; }
+    //END OF DUNGEON START MANAGER
+
+
+    /**
+     * Retrieve the dungeon's current difficulty level.
+     *
+     * @return The difficulty.
+     */
+    public int getDifficulty () {
+        return difficulty;
+    }
+
+    /**
+     * Set the dungeon's difficulty to a specified amount.
+     *
+     * @param amount The new difficulty.
+     */
+    public void setDifficulty (int amount) {
+        difficulty = amount;
+    }
+
+    /**
+     * Set the dungeon's difficulty based on the fixed formula.
+     *
+     * @return The new difficulty.
+     */
+    public int setDifficulty () {
+        return difficulty = ((BASE_DIFFICULTY * getPlayerCount() * 3) / 4) + 1;
+    }
     public void update () {
         int room = currentRoom;
         for (int index = currentRoom; index < rooms.size(); ++index) {
@@ -140,7 +335,7 @@ public class Dungeon {
      * @return The size of the players ArrayList.
      */
     public int getPlayerCount() {
-        return playerID.size();
+        return players.size();
     }
 
     /**
@@ -185,8 +380,8 @@ public class Dungeon {
 
         getBlockBelowPlayer(alive.get(0));
     }
-    public ArrayList<Player> getPlayers () { return dungeonManager.getPlayers(); }
-    public ArrayList<Player> getAlivePlayers () { return dungeonManager.getAlivePlayers(); }
+    public ArrayList<Player> getPlayers () { return players; }
+    public ArrayList<Player> getAlivePlayers () { return alivePlayers; }
     //public ArrayList<Player> getPlayers () { return dungeonManager.getPlayers (); }
 
     public RoomType getRoomType(Material m) {
@@ -344,7 +539,7 @@ public class Dungeon {
         this.addPlayerID(p);
         this.spawnPlayer(p);
 
-        dungeonManager.join(p);
+        //dungeonManager.join(p);
     }
 
     /**
@@ -356,9 +551,7 @@ public class Dungeon {
         return active;
     }
 
-    /*
-        Make a checking system for if player quits during a dungeon.
-     */
+    //Make a checking system for if player quits during a dungeon.
     /**
      * Prepare the player for returning to the main world. Restores their information
      * to its original state, then teleports them back.
@@ -366,7 +559,7 @@ public class Dungeon {
      * @param p The player that is leaving the dungeon.
      */
     public void playerQuit(Player p) {
-        dungeonManager.leave (p);
+        //dungeonManager.leave (p);
 
         this.removePlayerID(p);
         Location oldLocation = oldPlayerLocation.remove(p.getUniqueId());
@@ -389,7 +582,7 @@ public class Dungeon {
      * @return Dungeon manager.
      */
     public DungeonStartManager getDungeonManager() {
-        return dungeonManager;
+        return null;//dungeonManager;
     }
 
     /**
@@ -405,14 +598,7 @@ public class Dungeon {
         this.state = state;
     }
 
-    public boolean isFull () { return (playerID.size() == MAX_PLAYER_COUNT); }
-    public void checkPlayerLocations(List<Player> playerList) {
-        for (Player p : playerList) {
-            if (roomsFinished.contains(p.getLocation())) {
-                p.teleport(rooms.get(currentRoom).getSpawnLocation());
-            }
-        }
-    }
+    public boolean isFull () { return playerID.size() == MAX_PLAYER_COUNT; }
 
     public void killMobs() {
         List<Entity> entities = getWorldEntities();
@@ -439,13 +625,17 @@ public class Dungeon {
         nextRoom = 1;
         state = DungeonState.STARTED;
         current = rooms.get (0);
-        dungeonManager.timerActive = true;
+        timerActive = true;
+        setDifficulty();
         //rooms.get(currentRoom).update();
         //Remove barriers at entrance
     }
 
+    /**
+     * Resets the dungeon for a new run.
+     */
     public void reset() {
-        for (Player p : dungeonManager.getPlayers()) {
+        for (Player p : getPlayers()) {
             playerQuit(p);
         }
         active = false;
@@ -459,6 +649,7 @@ public class Dungeon {
         Bukkit.broadcastMessage(ChatColor.YELLOW +"The dungeon has been reset! Do /start-dungeon to begin!");
 
     }
+
 
     public void failed() {
         state = DungeonState.FAILED;
@@ -484,8 +675,9 @@ public class Dungeon {
         FINAL,
         NULL
     }
-    /* This is going to be a long section of class definitions.
-     * There will be a room definition for each type.
+    /* Begin DungeonRoom class definitions. Each one corresponds to a different RoomType and has unique
+     * properties. Fundamentally, each one checks that the user is inside the room, controls opening and
+     * closing the entrance and exits, and spawning mobs.
      */
     protected abstract class DungeonRoom {
         private final Material TRIGGER_BLOCK = Material.BROWN_GLAZED_TERRACOTTA;
@@ -493,11 +685,11 @@ public class Dungeon {
         private final Material EXIT_BLOCK = Material.BLACK_GLAZED_TERRACOTTA;
         protected Material fillType = Material.BLUE_WOOL;
         protected byte doorOffset = 3;
-        private Cuboid boundary;
-        private Cuboid entrance;
-        private Cuboid exit;
 
-        private Cuboid trigger;
+        private final Cuboid boundary;
+        private final Cuboid entrance;
+        private final Cuboid exit;
+        private final Cuboid trigger;
 
         private Location spawnLocation;
 
@@ -691,16 +883,15 @@ public class Dungeon {
                 return;
             if (!enteredRoom) {
                 if (checkAllPlayers(boundary)) {
-                    onPlayerEnter(dungeonManager.getAlivePlayers().get(0));
+                    onPlayerEnter(alivePlayers.get(0));
                     enteredRoom = true;
                 }
             }
             if (trigger == null)
                 return;
             if (!triggered)
-                if(checkPlayer(dungeonManager.getAlivePlayers().get(0), trigger))
+                if(checkPlayer(alivePlayers.get(0), trigger))
                     onTrigger();
-
             //if(checkAllPlayers(trigger));
             /*if (checkAllPlayers(next.trigger)) { //Next time you work on this, you are gonna work here. The way oyu implemented this
                                                 //Does not require using next. So, figure out how to check only current trigger. (Look in dungeon.update)
@@ -723,10 +914,9 @@ public class Dungeon {
             return container.contains(p.getLocation());
         }
         public boolean checkAllPlayers (Cuboid container) {
-            for (Player player : dungeonManager.getAlivePlayers()) {
+            for (Player player : alivePlayers)
                 if (!container.contains(player.getLocation()))
                     return false;
-            }
             return true;
         }
         public Location getSpawnLocation() {
@@ -760,7 +950,7 @@ public class Dungeon {
 
     }
     protected abstract class SpawnerDungeonRoom extends DungeonRoom {
-        private Map<Block, String> spawnerBlocks;
+        private final Map<Block, String> spawnerBlocks;
 
         protected boolean spawned;
         protected int waveCount = 5;
@@ -787,43 +977,29 @@ public class Dungeon {
 
         public void addSpawnerBlocks() {
             for (Block block : getBoundary()) {
-                if (block.getType().equals(Material.LIGHT_GRAY_CANDLE)) {
+                if (block.getType().equals(Material.LIGHT_GRAY_CANDLE))
                     spawnerBlocks.put(block, "zombie");
-                    continue;
-                }
-                if (block.getType().equals(Material.GRAY_CANDLE)) {
+                else if (block.getType().equals(Material.GRAY_CANDLE))
                     spawnerBlocks.put(block, "skeleton");
-                    continue;
-                }
-                if (block.getType().equals(Material.CYAN_CANDLE)) {
+                else if (block.getType().equals(Material.CYAN_CANDLE))
                     spawnerBlocks.put(block, "creeper");
-                    continue;
-                }
             }
         }
 
         public void spawnMobs() {
-
             if (spawnerBlocks == null || spawnerBlocks.isEmpty())
                 return;
-            for (Block block : spawnerBlocks.keySet()) {
+            for (Block block : spawnerBlocks.keySet())
                 DungeonMobs.spawnDungeonMobs(block.getLocation().add(0, 1, 0), spawnerBlocks.get(block));
-
-            }
-            Bukkit.getConsoleSender().sendMessage("Spawned mobs in " + this.getType().toString());
             spawned = true;
         }
-
     }
     protected abstract class MultiRoom extends DungeonRoom {
-
         public MultiRoom (Cuboid boundary, Cuboid trigger, Cuboid entrance, Cuboid exit, Location spawn) {
-            super (boundary, trigger, entrance, exit, spawn);
+            super(boundary, trigger, entrance, exit, spawn);
         }
-
     }
     protected class LobbyRoom extends DungeonRoom {
-
         private boolean start;
 
         public LobbyRoom(Cuboid boundary) {
@@ -835,10 +1011,8 @@ public class Dungeon {
             start = false;
         }
 
-
         @Override
         public void onPlayerEnter(Player player) {
-
         }
         @Override
         public void onTrigger () {
@@ -853,21 +1027,16 @@ public class Dungeon {
             triggered = false;
         }
 
-
         @Override
         public void update() {
-            if (!dungeonManager.isStarted())
+            if (!started)
                 return;
-
             /*if (!triggered)
                 onTrigger();*/
-
             super.update();
         }
     }
     protected class FillerRoom extends DungeonRoom {
-
-
         public FillerRoom(Cuboid boundary) {
             super(boundary);
             setType(RoomType.FILLER);
@@ -875,19 +1044,15 @@ public class Dungeon {
 
         @Override
         public void onPlayerEnter(Player player) {
-
-
         }
 
 
         @Override
         public void resetRoom() {
-
         }
     }
     protected class FindRoom extends DungeonRoom {
-
-        //public Key key;
+        //public Key;
         public FindRoom(Cuboid boundary) {
             super(boundary);
             setType(RoomType.FIND);
@@ -895,23 +1060,18 @@ public class Dungeon {
 
         @Override
         public void onPlayerEnter(Player player) {
-
-
         }
 
         @Override
         public void resetRoom() {
-
         }
 
         @Override
         public void update() {
-
         }
     }
     protected class ParkourRoom extends DungeonRoom {
-
-        //public Key key;
+        //public Key;
 
         public ParkourRoom(Cuboid boundary) {
             super(boundary);
@@ -920,18 +1080,14 @@ public class Dungeon {
 
         @Override
         public void onPlayerEnter(Player player) {
-
-
         }
 
         @Override
         public void resetRoom() {
-
         }
 
         @Override
         public void update() {
-
         }
     }
     protected class CollectionRoom extends DungeonRoom {
@@ -941,20 +1097,15 @@ public class Dungeon {
         }
         @Override
         public void onPlayerEnter(Player player) {
-
-
         }
         @Override
         public void resetRoom() {
-
         }
         @Override
         public void update() {
-
         }
     }
     protected class TargetRoom extends SpawnerDungeonRoom {
-
         public ArrayList<Block> targetBlocks;
 
         public TargetRoom(Cuboid boundary) {
@@ -969,66 +1120,50 @@ public class Dungeon {
         @Override
         public void onPlayerEnter(Player player) {
             spawnMobs();
-
         }
 
         @Override
         public void resetRoom() {
             for (Block block : targetBlocks)
                 block.setType(Material.NETHER_WART_BLOCK);
-
             openEntrance();
             openExit();
         }
 
-
-
         public void getTargetBlocks() {
-            for (Block block : getBoundary()) {
-                if (block.getType().equals(Material.NETHER_WART_BLOCK)) {
+            for (Block block : getBoundary())
+                if (block.getType().equals(Material.NETHER_WART_BLOCK))
                     targetBlocks.add(block);
-                }
-            }
             Bukkit.getConsoleSender().sendMessage("Found " + targetBlocks.size() + " blocks");
         }
 
         public boolean checkTargets() {
             int count = 0;
-            for (Block block : targetBlocks) {
-                if (block.getType().equals(Material.REDSTONE_BLOCK)) {
+            for (Block block : targetBlocks)
+                if (block.getType().equals(Material.REDSTONE_BLOCK))
                     ++count;
-                }
-            }
+
             Bukkit.getConsoleSender().sendMessage(count + "/" + targetBlocks.size() + " targets hit");
-
-            if (count == targetBlocks.size())
-                return true;
-
-            return false;
+            return count == targetBlocks.size();
         }
 
         public void onHitAllTargets() {
-            for (Block b : targetBlocks) {
+            for (Block b : targetBlocks)
                 b.setType(Material.NETHER_WART_BLOCK);
-            }
             targetBlocks.clear();
 
             openExit();
-            dungeonManager.sendPlayersMessage(ChatColor.GREEN + "An entrance has opened!");
-
+            sendPlayersMessage(ChatColor.GREEN + "An entrance has opened!");
         }
 
         @Override
         public void update() {
-            if (!targetBlocks.isEmpty() && checkTargets()) {
+            if (!targetBlocks.isEmpty() && checkTargets())
                 onHitAllTargets();
-            }
             super.update ();
         }
     }
     protected class MobRoom extends SpawnerDungeonRoom {
-
-
         public MobRoom(Cuboid boundary) {
             super(boundary);
             setType(RoomType.MOB);
@@ -1053,15 +1188,11 @@ public class Dungeon {
         }
     }
     protected class WaveRoom extends SpawnerDungeonRoom {
-
-
-
         public WaveRoom(Cuboid boundary) {
             super(boundary);
             setType(RoomType.WAVE);
             waveCount = 5;
             timeBetweenWaves = 8;
-
             openEntrance();
             openExit();
         }
@@ -1087,9 +1218,8 @@ public class Dungeon {
                     spawnNextWave();
                     countdown = timeBetweenWaves;
                 }
-                else {
+                else
                     --countdown;
-                }
                 return;
             }
             openExit();
@@ -1104,7 +1234,7 @@ public class Dungeon {
     }
     protected class BossRoom extends SpawnerDungeonRoom {
 
-        private Cuboid bossTrigger;
+        private final Cuboid bossTrigger;
         private Entity boss;
         private boolean bossSpawned = false;
         public BossRoom(Cuboid boundary, Cuboid bossTrigger) {
@@ -1123,20 +1253,19 @@ public class Dungeon {
         }
 
         public Location findBossTrigger () {
-            for (Block b : getBoundary()) {
-                if (b.getType().equals(Material.MELON)) {
+            for (Block b : getBoundary())
+                if (b.getType().equals(Material.MELON))
                     return b.getLocation();
-                }
-            }
+
             return null;
         }
 
         public void onBossKill () {
-
+            openExit ();
+            //Run end-game code
         }
         @Override
         public void onPlayerEnter(Player player) {
-
         }
         public void onBossTriggerEnter (Player p) {
             spawnBoss ();
@@ -1157,7 +1286,7 @@ public class Dungeon {
         public void update() {
             super.update();
             if (!bossSpawned) {
-                for (Player p : dungeonManager.getAlivePlayers()) {
+                for (Player p : getAlivePlayers()) {
                     if (bossTrigger.contains(p.getLocation())) {
                         onBossTriggerEnter(p);
                         return;
@@ -1167,20 +1296,12 @@ public class Dungeon {
             if (boss == null)
                 return;
 
-            if (boss.isDead()) {
-                openExit();
+            if (boss.isDead())
                 onBossKill ();
-                //Run end game code
-            }
         }
-
-
     }
     protected class FinalRoom extends DungeonRoom {
-
-        private Cuboid endDungeonTrigger;
-
-
+        private final Cuboid endDungeonTrigger;
 
         public FinalRoom(Cuboid boundary, Cuboid endDungeonTrigger) {
             super(boundary);
@@ -1189,7 +1310,6 @@ public class Dungeon {
         }
 
         public void playerTriggerEnter() {
-
         }
 
         @Override
@@ -1198,23 +1318,20 @@ public class Dungeon {
 
         }
         public void onEndTriggerEnter (Player p) {
-
         }
 
         @Override
         public void resetRoom() {
-
+            openEntrance();
+            openExit();
         }
 
         @Override
         public void update() {
             super.update();
-
-            for (Player p : dungeonManager.getAlivePlayers()) {
-                if (endDungeonTrigger.contains(p.getLocation())) {
+            for (Player p : alivePlayers)
+                if (endDungeonTrigger.contains(p.getLocation()))
                     onEndTriggerEnter(p);
-                }
-            }
         }
     }
 }

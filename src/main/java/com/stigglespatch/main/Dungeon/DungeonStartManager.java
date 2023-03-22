@@ -34,7 +34,7 @@ public class DungeonStartManager implements Listener {
     private ArrayList<Player> players;
     private ArrayList<Player> alivePlayers;
 
-    private Dungeon.DungeonRoom currentRoom;
+
 
     private int everySecondTaskID;
 
@@ -51,7 +51,9 @@ public class DungeonStartManager implements Listener {
         everySecondTaskID = Bukkit.getScheduler().scheduleSyncRepeatingTask(dungeon.getMain(), () -> everySecond(), 0L, 20L);
         Bukkit.getServer().getConsoleSender().sendMessage("DungeonStartManager: active!");
     }
-
+    public int getPlayerCount () {
+        return players.size();
+    }
     //This will need to be a Bukkit runnable set for every second.
     //We could also add the Cuboid code to this.
     public void everySecond () {
