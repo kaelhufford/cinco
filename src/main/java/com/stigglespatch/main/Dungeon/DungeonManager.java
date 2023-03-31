@@ -1,7 +1,6 @@
 package com.stigglespatch.main.Dungeon;
 
 import com.stigglespatch.main.Main;
-import jdk.incubator.vector.VectorOperators;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -68,7 +67,7 @@ public class DungeonManager {
     public static ArrayList<Player> getPlayers (String dungeon) {
         Dungeon d = dungeons.get (dungeon);
         if (d == null)
-            return new ArrayList<>();
+            return new ArrayList<Player>();
 
         return d.getPlayers();
     }
