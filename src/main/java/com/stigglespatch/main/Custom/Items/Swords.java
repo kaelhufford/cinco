@@ -44,10 +44,10 @@ public class Swords implements Listener {
         meta.setUnbreakable(true);
         meta.setDisplayName(ChatColor.GREEN + "Emerald Dagger");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "Has a 10% chance to drop 1-3 Emeralds on a",
-                "kill. ",
-                "",
-                "When paired with Sharpness V, the dagger",
-                "has a 20% chance to deal 50% more damage."));
+                ChatColor.GRAY + "kill. ",
+                ChatColor.GRAY + "",
+                ChatColor.GRAY + "When paired with Sharpness V, the dagger",
+                ChatColor.GRAY + "has a 20% chance to deal 50% more damage."));
         meta.setLocalizedName("emerald_dagger");
         item.setItemMeta(meta);
         return item;
@@ -69,12 +69,12 @@ public class Swords implements Listener {
         meta.setUnbreakable(true);
         meta.setDisplayName(ChatColor.GOLD + "Magma Cutlass");
         meta.setLore(Arrays.asList(ChatColor.GRAY + "When right-clicked, if not on the 15-second",
-                "cooldown, will send a flaming arrow in the",
-                "direction you are facing.",
+                ChatColor.GRAY + "cooldown, will send a flaming arrow in the",
+                ChatColor.GRAY + "direction you are facing.",
                 "",
-                "When taking fire damage, the cutlass's",
-                "damage will deal 5% more per damage",
-                "taken(while on fire, max being 50% more)"));
+                ChatColor.GRAY + "When taking fire damage, the cutlass's",
+                ChatColor.GRAY + "damage will deal 5% more per damage",
+                ChatColor.GRAY + "taken(while on fire, max being 50% more)"));
         meta.setLocalizedName("magma_cutlass");
         item.setItemMeta(meta);
         return item;

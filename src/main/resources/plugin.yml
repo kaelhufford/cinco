@@ -17,4 +17,6 @@ commands:
     description: idk
   check:
     description: hmmm
+  get-items:
+    description: a
 

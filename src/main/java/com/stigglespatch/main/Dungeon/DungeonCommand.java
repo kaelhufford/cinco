@@ -43,6 +43,10 @@ ADD MORE
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (sender instanceof Player){
+            Player p = (Player) sender;
+            p.teleport(Bukkit.getWorld("testdungeon").getBlockAt((int) 43.5, -42, (int) 190.5).getLocation());
+        }
 /*
         if (sender instanceof Player) {
             Player p = (Player) sender;

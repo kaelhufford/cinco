@@ -39,7 +39,7 @@ public final class Main extends JavaPlugin implements Listener {
         return roomNumber;
     }
     DungeonStartCommand dSC = new DungeonStartCommand();
-    DungeonMobs dungeonMobs = new DungeonMobs();
+    //DungeonMobs dungeonMobs = new DungeonMobs();
     private PlayerManager playerManager;
     public final NamespacedKey pendant = new NamespacedKey(this, "pendant");
 
@@ -61,6 +61,7 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginCommand("creative").setExecutor(new CreativeCommand());
         Bukkit.getPluginCommand("start-dungeon").setExecutor(new DungeonStartCommand());
         Bukkit.getPluginCommand("check").setExecutor(new CheckCommand());
+        Bukkit.getPluginCommand("get-items").setExecutor(new getItemsCommand());
 
         if (Bukkit.getWorld("smp_cinco") == null){
             Bukkit.getServer().createWorld(new WorldCreator("smp_cinco"));
@@ -74,10 +75,10 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new DungeonStartCommand(), this);
         Bukkit.getPluginManager().registerEvents(new DungeonMobs(), this);
-
         Bukkit.getPluginManager().registerEvents(new Swords(), this);
         Bukkit.getPluginManager().registerEvents(new BoomBow(), this);
         Bukkit.getPluginManager().registerEvents(new GlowBow(), this);
+
 
         Smelter as = new Smelter();
         Bukkit.getPluginManager().registerEvents(as, this);
