@@ -174,6 +174,8 @@ public class Dungeon implements Listener {
 
             if (getPlayerCount() == getMaxPlayerCount() && countdown >= 0)
                 countdown = 10;
+
+            Bukkit.getConsoleSender().sendMessage("Dungeon is starting in " + countdown);
         }
         this.players.add(p);
         this.alivePlayers.add(p);
@@ -279,8 +281,9 @@ public class Dungeon implements Listener {
         for (int index = currentRoom; index < rooms.size(); ++index) {
             if (rooms.get(index).checkPlayer(this.getAlivePlayers().get(0), rooms.get(index).getBoundary())) {
                 if (room > currentRoom) {
+                    rooms.get (currentRoom).closeExit ();
                     currentRoom = room;
-                    current = rooms.get(currentRoom);
+                    current = rooms.get (currentRoom);
                     Bukkit.getConsoleSender().sendMessage("Player has advanced to the next room!");
                 }
                 rooms.get(index).update ();
@@ -625,6 +628,7 @@ public class Dungeon implements Listener {
         nextRoom = 1;
         state = DungeonState.STARTED;
         current = rooms.get (0);
+        current.openExit();
         timerActive = true;
         setDifficulty();
         //rooms.get(currentRoom).update();
@@ -1114,7 +1118,7 @@ public class Dungeon implements Listener {
             targetBlocks = new ArrayList<>();
             getTargetBlocks();
             openEntrance();
-            openExit();
+            closeExit();
         }
 
         @Override
@@ -1127,7 +1131,7 @@ public class Dungeon implements Listener {
             for (Block block : targetBlocks)
                 block.setType(Material.NETHER_WART_BLOCK);
             openEntrance();
-            openExit();
+            closeExit();
         }
 
         public void getTargetBlocks() {

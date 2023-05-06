@@ -48,7 +48,7 @@ public class DungeonManager {
                 return false;
             }
 
-            currentDungeon.playerJoin(player);
+            currentDungeon.join(player);
             player.sendMessage(ChatColor.GREEN + "Successfully added you to the dungeon!");
         }
         else {

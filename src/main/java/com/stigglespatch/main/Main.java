@@ -39,7 +39,7 @@ public final class Main extends JavaPlugin implements Listener {
         return roomNumber;
     }
     DungeonStartCommand dSC = new DungeonStartCommand();
-    DungeonMobs dungeonMobs = new DungeonMobs();
+    //DungeonMobs dungeonMobs = new DungeonMobs();
     private PlayerManager playerManager;
     public final NamespacedKey pendant = new NamespacedKey(this, "pendant");
 
