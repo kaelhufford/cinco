@@ -30,7 +30,12 @@ public class GlowBow implements Listener {
         ItemMeta meta = bow.getItemMeta();
         meta.setUnbreakable(true);
         meta.setDisplayName(("Recon Bow"));
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "This bow scans nearby entities within a 10x10x10 block", "radius, but uses 10 experience levels!"));
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "This bow scans nearby entities",
+                ChatColor.GRAY + "within a 10x10x10 block radius",
+                ChatColor.GRAY + "then makes them GLOW for 10 seconds"));
         meta.setLocalizedName("glow_bow");
         bow.setItemMeta(meta);
         return bow;

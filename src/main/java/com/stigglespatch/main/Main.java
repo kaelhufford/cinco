@@ -1,8 +1,10 @@
 package com.stigglespatch.main;
 
 import com.stigglespatch.main.Custom.Enchants.Smelter;
+import com.stigglespatch.main.Custom.Items.Armor.AnarchysWardrobe;
 import com.stigglespatch.main.Custom.Items.Bows.BoomBow;
 import com.stigglespatch.main.Custom.Items.Bows.GlowBow;
+import com.stigglespatch.main.Custom.Items.Pickaxes;
 import com.stigglespatch.main.Custom.Items.Swords;
 import com.stigglespatch.main.Database.ConnectionListener;
 import com.stigglespatch.main.Database.Database;
@@ -78,6 +80,8 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new Swords(), this);
         Bukkit.getPluginManager().registerEvents(new BoomBow(), this);
         Bukkit.getPluginManager().registerEvents(new GlowBow(), this);
+        Bukkit.getPluginManager().registerEvents(new Pickaxes(), this);
+        Bukkit.getPluginManager().registerEvents(new AnarchysWardrobe(), this);
 
 
         Smelter as = new Smelter();

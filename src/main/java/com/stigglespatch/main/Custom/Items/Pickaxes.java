@@ -35,8 +35,13 @@ public class Pickaxes implements Listener {
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(true);
         meta.setDisplayName(ChatColor.AQUA + "Smurf's Handy Tool");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "When mining stone, coal ore, iron ore, lapis lazuli,",
-                ChatColor.GRAY +  "gold ore, diamond ore, and ancient debris - you get Haste 2"));
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "When mining stone, coal ore,",
+                ChatColor.GRAY +  "iron ore, lapis lazuli,",
+                ChatColor.GRAY +  "gold ore, diamond ore, and",
+                ChatColor.GRAY +  "ancient debris, you mine it faster"));
         meta.setLocalizedName("smurf_handy_tool");
         item.setItemMeta(meta);
         return item;
@@ -50,19 +55,23 @@ public class Pickaxes implements Listener {
         Smurfs Handy Tool (Netherite Pickaxe)
         Mines stone, coal ore, iron ore, lapis lazuli, gold ore, diamond ore, and ancient debris 30% faster.
         */
-        ItemStack item = new ItemStack(Material.IRON_PICKAXE);
+        ItemStack item = new ItemStack(Material.GOLDEN_PICKAXE);
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(true);
         meta.setDisplayName(ChatColor.BLUE + "The Warden's Weakness");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "Deals 200% more damage to the warden than any other",
-                ChatColor.GRAY +  "pickaxe.",
+        meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
-                ChatColor.GRAY + "When paired with fortune III, the pickaxe allows",
-                ChatColor.GRAY +  "anywhere from 2x - 4x drops."));
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "Deals double your experience as",
+                ChatColor.GRAY +  "damage to the warden.",
+                ChatColor.GRAY +  "",
+                ChatColor.GRAY + "When paired with fortune III,",
+                ChatColor.GRAY + "the pickaxe allows anywhere from",
+                ChatColor.GRAY +  "2x - 4x drops."));
         meta.setLocalizedName("warden_weakness");
         item.setItemMeta(meta);
         return item;
-    }
+}
     public ItemStack giveWardenWeaknessPickaxe(){
         return getWardenWeaknessPickaxe();
     }
@@ -82,71 +91,62 @@ public class Pickaxes implements Listener {
     @EventHandler
     public void breakBlock(BlockBreakEvent e) {
         if (e.getPlayer() != null){
-            System.out.println("it is a player");
             Player p = e.getPlayer();
             if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("warden_weakness")
                     && p.getInventory().getItemInMainHand().getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)){
-                System.out.println("they have fortune");
                 int level = p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
                 if (level == 3){
-                    System.out.println("they have level three fortune");
                     Material block = e.getBlock().getType();
                     if (block.equals(Material.COAL_ORE) || block.equals(Material.DEEPSLATE_COAL_ORE)) {
-                        System.out.println("coal ore");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.COAL, Math.multiplyExact(Math.addExact(rollNumber(0,2), rollNumber(3,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.DIAMOND_ORE) || block.equals(Material.DEEPSLATE_DIAMOND_ORE)) {
-                        System.out.println("diamond ore");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.DIAMOND, Math.multiplyExact(Math.addExact(rollNumber(0,1), rollNumber(3,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.REDSTONE_ORE) || block.equals(Material.DEEPSLATE_REDSTONE_ORE)) {
-                        System.out.println("redstone ore");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.REDSTONE, Math.multiplyExact(Math.addExact(rollNumber(0,2), rollNumber(3,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.EMERALD_ORE) || block.equals(Material.DEEPSLATE_EMERALD_ORE)) {
-                        System.out.println("emerald ore");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.EMERALD, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(2,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.LAPIS_ORE) || block.equals(Material.DEEPSLATE_LAPIS_ORE)) {
-                        System.out.println("lapis ore");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.LAPIS_LAZULI, Math.multiplyExact(Math.addExact(rollNumber(2,3), rollNumber(2,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.NETHER_QUARTZ_ORE)) {
-                        System.out.println("quartz ore");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.QUARTZ, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.MELON)) {
-                        System.out.println("melon");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.MELON_SLICE, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.CLAY)) {
-                        System.out.println("clay");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.STONE, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.GLOWSTONE)) {
-                        System.out.println("glowstone");
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
                                 new ItemStack(Material.GLOWSTONE_DUST, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
 
-                    } else {
-                        System.out.println("It was not a warden pick block");
+                    } else if (block.equals(Material.ANCIENT_DEBRIS)) {
+                        e.setDropItems(false);
+                        e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
+                                new ItemStack(Material.NETHERITE_SCRAP, Math.multiplyExact(Math.addExact(1, rollNumber(1,2)), rollNumber(1,2))));
+
                     }
                 }
             }

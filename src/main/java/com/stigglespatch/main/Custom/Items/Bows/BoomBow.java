@@ -1,6 +1,7 @@
 package com.stigglespatch.main.Custom.Items.Bows;
 
 import com.stigglespatch.main.Main;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -26,7 +27,11 @@ public class BoomBow implements Listener {
         ItemMeta meta = bow.getItemMeta();
         meta.setUnbreakable(true);
         meta.setDisplayName(("Boom Boom Bow"));
-        meta.setLore(Arrays.asList("This bow is boomin!"));
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "The arrows shot from this" ,
+                ChatColor.GRAY + "bow explode on impact!"));
         meta.setLocalizedName("boom_bow");
         bow.setItemMeta(meta);
         return bow;

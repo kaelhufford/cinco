@@ -2,6 +2,7 @@ package com.stigglespatch.main.Custom.Items;
 
 import com.stigglespatch.main.Main;
 import org.bukkit.*;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -43,11 +44,15 @@ public class Swords implements Listener {
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(true);
         meta.setDisplayName(ChatColor.GREEN + "Emerald Dagger");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "Has a 10% chance to drop 1-3 Emeralds on a",
-                ChatColor.GRAY + "kill. ",
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "Has a random chance to drop",
+                ChatColor.GRAY + "multiple emeralds on a kill. ",
                 ChatColor.GRAY + "",
-                ChatColor.GRAY + "When paired with Sharpness V, the dagger",
-                ChatColor.GRAY + "has a 20% chance to deal 50% more damage."));
+                ChatColor.GRAY + "When enchanted with Sharpness V",
+                ChatColor.GRAY + "the dagger has a chance",
+                ChatColor.GRAY + "to deal 15-35 damage."));
         meta.setLocalizedName("emerald_dagger");
         item.setItemMeta(meta);
         return item;
@@ -62,19 +67,33 @@ public class Swords implements Listener {
             return (item.getItemMeta().getLocalizedName().equals("emerald_dagger"));
         }
     }
+    private boolean hasSharpV(ItemStack item) {
+        if (isEmeraldDagger(item)){
+            if (item.getItemMeta().hasEnchant(Enchantment.DAMAGE_ALL)) {
+                if (item.getItemMeta().getEnchantLevel(Enchantment.DAMAGE_ALL) == 5){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private ItemStack getMagmaCutlass(){
         ItemStack item = new ItemStack(Material.MAGMA_CREAM);
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(true);
         meta.setDisplayName(ChatColor.GOLD + "Magma Cutlass");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "When right-clicked, if not on the 15-second",
-                ChatColor.GRAY + "cooldown, will send a flaming arrow in the",
-                ChatColor.GRAY + "direction you are facing.",
-                "",
-                ChatColor.GRAY + "When taking fire damage, the cutlass's",
-                ChatColor.GRAY + "damage will deal 5% more per damage",
-                ChatColor.GRAY + "taken(while on fire, max being 50% more)"));
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "When right-clicked, it uses 1",
+                ChatColor.GRAY + "experience level to shoot a",
+                ChatColor.GRAY + "flaming arrow in the direction",
+                ChatColor.GRAY + "you are facing.",
+                        "",
+                ChatColor.GRAY + "While taking damage by fire,",
+                ChatColor.GRAY + "you will deal significantly more",
+                ChatColor.GRAY + "damage to all entities."));
         meta.setLocalizedName("magma_cutlass");
         item.setItemMeta(meta);
         return item;
@@ -96,8 +115,15 @@ public class Swords implements Listener {
     public void onDamageWithEmeraldDagger(EntityDamageByEntityEvent e){
         if (e.getDamager() instanceof Player){
             Player p = (Player) e.getDamager();
-            if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("emerald_dagger")){
-                e.setDamage(10);
+            if (isEmeraldDagger(p.getInventory().getItemInMainHand())){
+                if (hasSharpV(p.getInventory().getItemInMainHand())){
+                    int numberRoll = rollNumber(1,2);
+                    if (numberRoll == 2) {
+                        e.setDamage(Math.round(Math.addExact(rollNumber(5,15), Math.multiplyExact(10, rollNumber(1,2)))));
+                    }
+                } else {
+                    e.setDamage(10);
+                }
             }
         }
     }
@@ -105,12 +131,12 @@ public class Swords implements Listener {
     public void onEntityDeathEmeraldDagger(EntityDeathEvent e){
         if (e.getEntity().getKiller() instanceof Player){
             Player p = e.getEntity().getKiller();
-            if (p.getInventory().getItemInMainHand().equals(Material.EMERALD)
-                    && p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("emerald_dagger")){
-                if (rollNumber(0,11) == 1){
-                    int emeralds = rollNumber(0,5);
+            if (isEmeraldDagger(p.getInventory().getItemInMainHand())){
+                int numberRoll = rollNumber(1,6);
+                if (numberRoll == 1){
+                    int emeralds = rollNumber(1,6);
                     p.getInventory().addItem(new ItemStack(Material.EMERALD, emeralds));
-                    p.sendMessage(ChatColor.GREEN + "You have received emeralds as a reward for using your Emerald Blade.");
+                    p.sendMessage(ChatColor.GREEN + "You just received " + emeralds + " emeralds from killing with the Emerald Dagger.");
                 }
             }
         }
@@ -120,11 +146,13 @@ public class Swords implements Listener {
     public void onDamageWithMagmaCutlass(EntityDamageByEntityEvent e){
         if (e.getDamager() instanceof Player){
             Player p = (Player) e.getDamager();
-            if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("magma_cutlass")){
+            if (isMagmaCutlass(p.getInventory().getItemInMainHand())){
                 if(Math.floorDiv(p.getFireTicks(), 20) >= 1) {
-                    e.setDamage((int) Math.addExact(7, Math.multiplyExact(p.getFireTicks(), (long) 0.05)));
+                    e.setDamage(Math.addExact(7, Math.multiplyExact(p.getFireTicks(), 1)));
+                    System.out.println("Dealt Magma Fire Damage" + Math.addExact(7, Math.multiplyExact(p.getFireTicks(), 1)) + "Damage compared to 7");
                 } else {
                     e.setDamage(7);
+                    System.out.println("Dealt Normal Damage");
                 }
             }
         }
@@ -137,12 +165,12 @@ public class Swords implements Listener {
                     Location loc = e.getPlayer().getLocation();
                     Vector dir = loc.getDirection();
                     Arrow arrow = e.getPlayer().getWorld().spawn(loc.add(0, 2, 0), Arrow.class);
-                    arrow.setFireTicks(20 * 10);
+                    arrow.setFireTicks(100);
                     arrow.setVisualFire(true);
                     double speed = 1.5;
                     arrow.setVelocity(dir.multiply(speed));
                 }
             }
-        }
-    }
+
+        }}
 }
