@@ -150,13 +150,11 @@ Slight Speed Increase
     @EventHandler
     public void playerInCombat(PlayerInteractEvent e){
         Player p = e.getPlayer();
-        System.out.println("Checking for full set.");
 
         if (isAnarchySet(p)){
-            System.out.println("Has the full set.");
 
-            p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 5, 1, true, true, true));
-            p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 5, 1, true, true, true));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20, 1, true, true, true));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20, 1, true, true, true));
         }
     }
 

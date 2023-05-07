@@ -152,19 +152,17 @@ public class Pickaxes implements Listener {
             }
         }
     }
-
     @EventHandler
-    public void breakingBlockEvent(PlayerInteractEvent e){
-        if (e.hasBlock() == true){
-            Player p = e.getPlayer();
-            if (e.getPlayer().getInventory().getItemInMainHand() == null) {return;}
-            if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("smurf_handy_tool")){
-                Material block = e.getMaterial();
-                if (block.equals(Material.STONE) || block.equals(Material.IRON_ORE) || block.equals(Material.COAL_ORE) || block.equals(Material.GOLD_ORE)
-                        || block.equals(Material.LAPIS_ORE) || block.equals(Material.DIAMOND_ORE) || block.equals(Material.ANCIENT_DEBRIS)){
-                    p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 40, 225, false, false, false));
-                }
+    public void playerInCombat(PlayerInteractEvent e){
+        Player p = e.getPlayer();
+        if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("smurf_handy_tool")){
+            Material block = e.getMaterial();
+
+            if (block.equals(Material.STONE) || block.equals(Material.IRON_ORE) || block.equals(Material.COAL_ORE) || block.equals(Material.GOLD_ORE)
+                    || block.equals(Material.LAPIS_ORE) || block.equals(Material.DIAMOND_ORE) || block.equals(Material.ANCIENT_DEBRIS)){
+                p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 20, 1, true, true, true));
             }
         }
     }
+
 }
