@@ -30,7 +30,7 @@ public class ConnectionListener implements Listener {
         } catch (SQLException ex) {
             //If we get an error about PlayerQuitEvent, we need to make sure that playerLeave () knows that the player
             //got kicked. We need to exit the function early.
-            player.kickPlayer("The data that you have requested could not be gotten. Please contact administration.");
+            //player.kickPlayer("The data that you have requested could not be gotten. Please contact administration.");
             ex.printStackTrace();
         }
 

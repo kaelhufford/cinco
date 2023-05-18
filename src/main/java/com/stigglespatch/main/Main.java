@@ -2,6 +2,7 @@ package com.stigglespatch.main;
 
 import com.stigglespatch.main.Custom.Enchants.Smelter;
 import com.stigglespatch.main.Custom.Items.Armor.AnarchysWardrobe;
+import com.stigglespatch.main.Custom.Items.Armor.PeacesSymphony;
 import com.stigglespatch.main.Custom.Items.Bows.BoomBow;
 import com.stigglespatch.main.Custom.Items.Bows.GlowBow;
 import com.stigglespatch.main.Custom.Items.Pickaxes;
@@ -14,18 +15,30 @@ import com.stigglespatch.main.Dungeon.Cuboids.Cuboid;
 import com.stigglespatch.main.Misc.CreativeCommand;
 import com.stigglespatch.main.Misc.SMPCommand;
 import org.bukkit.*;
+import org.bukkit.entity.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public final class Main extends JavaPlugin implements Listener {
@@ -43,6 +56,7 @@ public final class Main extends JavaPlugin implements Listener {
     DungeonStartCommand dSC = new DungeonStartCommand();
     //DungeonMobs dungeonMobs = new DungeonMobs();
     private PlayerManager playerManager;
+    PeacesSymphony peacesSymphony = new PeacesSymphony();
     public final NamespacedKey pendant = new NamespacedKey(this, "pendant");
 
 
@@ -65,10 +79,10 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginCommand("check").setExecutor(new CheckCommand());
         Bukkit.getPluginCommand("get-items").setExecutor(new getItemsCommand());
 
-        if (Bukkit.getWorld("smp_cinco") == null){
+        if (Bukkit.getWorld("smp_cinco") == null) {
             Bukkit.getServer().createWorld(new WorldCreator("smp_cinco"));
         }
-        if (Bukkit.getWorld("testdungeon") == null){
+        if (Bukkit.getWorld("testdungeon") == null) {
             Bukkit.getServer().createWorld(new WorldCreator("testdungeon"));
         }
         System.out.println("Generated the third-party worlds.");
@@ -82,23 +96,51 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new GlowBow(), this);
         Bukkit.getPluginManager().registerEvents(new Pickaxes(), this);
         Bukkit.getPluginManager().registerEvents(new AnarchysWardrobe(), this);
+        Bukkit.getPluginManager().registerEvents(new PeacesSymphony(), this);
+
+        new BukkitRunnable() {
+            public void run() {
+                peacesSymphony.checkForPeaceArmor();
+            }
+        }.runTaskTimer(this, 0, 40);
+
+        //CUSTOM CRAFTING RECIPES
+
+        ItemStack customItem = new ItemStack(Material.EMERALD);
+        ItemMeta meta = customItem.getItemMeta();
+        meta.setLocalizedName("emerald_blade");
+        customItem.setItemMeta(meta);
 
 
-        Smelter as = new Smelter();
-        Bukkit.getPluginManager().registerEvents(as, this);
-        registerEnchantment(as);
+        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
+        ItemMeta bookmeta = customItem.getItemMeta();
+        bookmeta.addEnchant(Enchantment.DAMAGE_ALL, 5 ,true);
+        book.setItemMeta(bookmeta);
+
+        ItemStack item = new ItemStack(Material.EMERALD);
+        ItemMeta emeraldItemMeta = customItem.getItemMeta();
+        item.getItemMeta();
+        emeraldItemMeta.addEnchant(Enchantment.DAMAGE_ALL, 5 ,true);
+        emeraldItemMeta.setUnbreakable(true);
+        emeraldItemMeta.setDisplayName(ChatColor.GREEN + "Emerald Dagger");
+        emeraldItemMeta.setLore(Arrays.asList(
+                ChatColor.GRAY + "",
+                ChatColor.GOLD + "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "Has a random chance to drop",
+                ChatColor.GRAY + "multiple emeralds on a kill. ",
+                ChatColor.GRAY + "",
+                ChatColor.GRAY + "Since enchanted with Sharpness V,",
+                ChatColor.GRAY + "the dagger has a chance",
+                ChatColor.GRAY + "to deal 15-35 damage."));
+        emeraldItemMeta.setLocalizedName("emerald_dagger");
+        item.setItemMeta(emeraldItemMeta);
+
+        ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(this, "enchant"), item);
+        recipe.addIngredient(Material.ENCHANTED_BOOK);
+        recipe.addIngredient(new RecipeChoice.ExactChoice(customItem));
+        Bukkit.addRecipe(recipe);
     }
 
-    private void registerEnchantment(Enchantment enchantment){
-        try {
-            Field field =Enchantment.class.getDeclaredField("acceptingNew");
-            field.setAccessible(true);
-            field.set(null, true);
-            Enchantment.registerEnchantment(enchantment);
-        } catch (NoSuchFieldException | IllegalAccessException e){
-            throw new RuntimeException(e);
-        }
-    }
     private void getEntitiesInRoom(Cuboid collectionRoom) {
         for(Block block : collectionRoom.getBlocks()){
             if(block.getType().equals(Material.LIGHT_GRAY_CANDLE)){

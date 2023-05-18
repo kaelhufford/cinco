@@ -1,17 +1,15 @@
 package com.stigglespatch.main.Custom.Items.Armor;
 
-import com.stigglespatch.main.Custom.Items.Bows.BoomBow;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -19,6 +17,13 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.Arrays;
 
 public class AnarchysWardrobe implements Listener {
+
+    private String helm;
+    private String chest;
+    private String legs;
+    private String boot;
+
+
 
     private ItemStack getAnarchysHelmet(){
         ItemStack item = new ItemStack(Material.LEATHER_HELMET);
@@ -36,8 +41,14 @@ public class AnarchysWardrobe implements Listener {
                 ChatColor.GRAY + "gain the following buffs",
                 ChatColor.GRAY + ChatColor.BOLD.toString() + "IN COMBAT",
                 ChatColor.GRAY + "- Regeneration 1",
+                ChatColor.GRAY + "- Strength 1",
                 ChatColor.GRAY + "- Speed 1"));
         meta.setLocalizedName("a_helmet");
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 3, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
         item.setItemMeta(meta);
         return item;
     }
@@ -57,8 +68,15 @@ public class AnarchysWardrobe implements Listener {
                 ChatColor.GRAY + "gain the following buffs",
                 ChatColor.GRAY + ChatColor.BOLD.toString() + "IN COMBAT",
                 ChatColor.GRAY + "- Regeneration 1",
+                ChatColor.GRAY + "- Strength 1",
                 ChatColor.GRAY + "- Speed 1"));
         meta.setLocalizedName("a_chestplate");
+
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 8, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
         item.setItemMeta(meta);
         return item;
     }
@@ -79,8 +97,15 @@ public class AnarchysWardrobe implements Listener {
                 ChatColor.GRAY + "gain the following buffs",
                 ChatColor.GRAY + ChatColor.BOLD.toString() + "IN COMBAT",
                 ChatColor.GRAY + "- Regeneration 1",
+                ChatColor.GRAY + "- Strength 1",
                 ChatColor.GRAY + "- Speed 1"));
         meta.setLocalizedName("a_leggins");
+
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 6, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
         item.setItemMeta(meta);
         return item;
     }
@@ -100,21 +125,43 @@ public class AnarchysWardrobe implements Listener {
                 ChatColor.GRAY + "gain the following buffs",
                 ChatColor.GRAY + ChatColor.BOLD.toString() + "IN COMBAT",
                 ChatColor.GRAY + "- Regeneration 1",
+                ChatColor.GRAY + "- Strength 1",
                 ChatColor.GRAY + "- Speed 1"));
         meta.setLocalizedName("a_boots");
+
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 2, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
         item.setItemMeta(meta);
         return item;
     }
 
     private Boolean isAnarchySet(Player p){
-        System.out.println("Checking for full set.");
+        helm = "placeholder1";
+        chest = "placeholder2";
+        legs = "placeholder3";
+        boot = "placeholder4";
 
-        String helm = p.getInventory().getHelmet().getItemMeta().getLocalizedName();
-        String chest = p.getInventory().getChestplate().getItemMeta().getLocalizedName();
-        String legs = p.getInventory().getLeggings().getItemMeta().getLocalizedName();
-        String boot = p.getInventory().getBoots().getItemMeta().getLocalizedName();
+        if (p.getInventory().getHelmet() != null){
+            helm = p.getInventory().getHelmet().getItemMeta().getLocalizedName();
+        }
+        if (p.getInventory().getChestplate() != null){
+            chest = p.getInventory().getChestplate().getItemMeta().getLocalizedName();
+        }
+        if (p.getInventory().getLeggings() != null){
+            legs = p.getInventory().getLeggings().getItemMeta().getLocalizedName();
+        }
+        if (p.getInventory().getBoots() != null){
+            boot = p.getInventory().getBoots().getItemMeta().getLocalizedName();
+        }
 
         if (helm.equals("a_helmet") && chest.equals("a_chestplate") && legs.equals("a_leggins") && boot.equals("a_boots")){
+            helm = "placeholder1";
+            chest = "placeholder2";
+            legs = "placeholder3";
+            boot = "placeholder4";
             return true;
         }
         return false;
@@ -153,8 +200,10 @@ Slight Speed Increase
 
         if (isAnarchySet(p)){
 
-            p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20, 1, true, true, true));
-            p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20, 1, true, true, true));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 40, 0, false, false, true));
+            p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 0, false, false, true));
+
+            p.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 40, 0, false, false, true));
         }
     }
 

@@ -51,8 +51,8 @@ public class Swords implements Listener {
                 ChatColor.GRAY + "multiple emeralds on a kill. ",
                 ChatColor.GRAY + "",
                 ChatColor.GRAY + "When enchanted with Sharpness V",
-                ChatColor.GRAY + "the dagger has a chance",
-                ChatColor.GRAY + "to deal 15-35 damage."));
+                ChatColor.GRAY + "the dagger unlocks a special",
+                ChatColor.GRAY + "ability."));
         meta.setLocalizedName("emerald_dagger");
         item.setItemMeta(meta);
         return item;
@@ -117,7 +117,7 @@ public class Swords implements Listener {
             Player p = (Player) e.getDamager();
             if (isEmeraldDagger(p.getInventory().getItemInMainHand())){
                 if (hasSharpV(p.getInventory().getItemInMainHand())){
-                    int numberRoll = rollNumber(1,2);
+                    int numberRoll = rollNumber(2,2);
                     if (numberRoll == 2) {
                         e.setDamage(Math.round(Math.addExact(rollNumber(5,15), Math.multiplyExact(10, rollNumber(1,2)))));
                     }
@@ -149,10 +149,8 @@ public class Swords implements Listener {
             if (isMagmaCutlass(p.getInventory().getItemInMainHand())){
                 if(Math.floorDiv(p.getFireTicks(), 20) >= 1) {
                     e.setDamage(Math.addExact(7, Math.multiplyExact(p.getFireTicks(), 1)));
-                    System.out.println("Dealt Magma Fire Damage" + Math.addExact(7, Math.multiplyExact(p.getFireTicks(), 1)) + "Damage compared to 7");
                 } else {
                     e.setDamage(7);
-                    System.out.println("Dealt Normal Damage");
                 }
             }
         }
@@ -172,5 +170,8 @@ public class Swords implements Listener {
                 }
             }
 
-        }}
+        }
+    }
+
+
 }

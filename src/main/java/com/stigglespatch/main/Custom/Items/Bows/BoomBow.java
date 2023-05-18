@@ -26,7 +26,7 @@ public class BoomBow implements Listener {
         ItemStack bow = new ItemStack(Material.BOW);
         ItemMeta meta = bow.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName(("Boom Boom Bow"));
+        meta.setDisplayName((ChatColor.WHITE + "Boom Boom Bow"));
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.GOLD +  "-- SPECIAL ITEM --",
@@ -38,7 +38,6 @@ public class BoomBow implements Listener {
     }
     @EventHandler
     public void onShoot(EntityShootBowEvent e){
-        if(!(e.getEntity() instanceof Player)) return;
         if (e.getBow().getItemMeta().getLocalizedName().equals("boom_bow")){
             e.getProjectile().getPersistentDataContainer().set(boomKey, PersistentDataType.STRING, "boom_arrow");
         }

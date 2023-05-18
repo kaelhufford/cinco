@@ -7,6 +7,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -84,13 +85,13 @@ public class Pickaxes implements Listener {
                     && e.getEntity().getType().equals(EntityType.WARDEN)){
 
                 int experience = p.getExpToLevel();
-                e.setDamage(experience);
+                e.setDamage(experience/2);
             }
         }
     }
     @EventHandler
     public void breakBlock(BlockBreakEvent e) {
-        if (e.getPlayer() != null){
+        if (e.getPlayer() != null && e.getPlayer().getInventory().getItemInMainHand().getItemMeta() != null){
             Player p = e.getPlayer();
             if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("warden_weakness")
                     && p.getInventory().getItemInMainHand().getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)){
@@ -135,7 +136,7 @@ public class Pickaxes implements Listener {
                     } else if (block.equals(Material.CLAY)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
-                                new ItemStack(Material.STONE, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
+                                new ItemStack(Material.CLAY_BALL, Math.multiplyExact(Math.addExact(rollNumber(1,2), rollNumber(3,4)), rollNumber(2,4))));
 
                     } else if (block.equals(Material.GLOWSTONE)) {
                         e.setDropItems(false);
@@ -145,7 +146,7 @@ public class Pickaxes implements Listener {
                     } else if (block.equals(Material.ANCIENT_DEBRIS)) {
                         e.setDropItems(false);
                         e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(),
-                                new ItemStack(Material.NETHERITE_SCRAP, Math.multiplyExact(Math.addExact(1, rollNumber(1,2)), rollNumber(1,2))));
+                                new ItemStack(Material.ANCIENT_DEBRIS, Math.multiplyExact(Math.addExact(1, rollNumber(1,2)), rollNumber(1,2))));
 
                     }
                 }
@@ -155,12 +156,16 @@ public class Pickaxes implements Listener {
     @EventHandler
     public void playerInCombat(PlayerInteractEvent e){
         Player p = e.getPlayer();
-        if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("smurf_handy_tool")){
-            Material block = e.getMaterial();
+        if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)){
+            if (p.getInventory().getItemInMainHand().getItemMeta() != null) {
+                if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("smurf_handy_tool")){
+                    Material block = e.getClickedBlock().getBlockData().getMaterial();
+                    if (block.equals(Material.STONE) || block.equals(Material.IRON_ORE) || block.equals(Material.COAL_ORE) || block.equals(Material.GOLD_ORE)
+                            || block.equals(Material.LAPIS_ORE) || block.equals(Material.DIAMOND_ORE) || block.equals(Material.ANCIENT_DEBRIS)){
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 100, 2, false, false, true));
 
-            if (block.equals(Material.STONE) || block.equals(Material.IRON_ORE) || block.equals(Material.COAL_ORE) || block.equals(Material.GOLD_ORE)
-                    || block.equals(Material.LAPIS_ORE) || block.equals(Material.DIAMOND_ORE) || block.equals(Material.ANCIENT_DEBRIS)){
-                p.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 20, 1, true, true, true));
+                    }
+                }
             }
         }
     }

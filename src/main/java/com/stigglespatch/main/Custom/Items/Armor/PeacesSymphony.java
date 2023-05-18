@@ -1,12 +1,11 @@
 package com.stigglespatch.main.Custom.Items.Armor;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
@@ -15,6 +14,13 @@ import org.bukkit.potion.PotionEffectType;
 import java.util.Arrays;
 
 public class PeacesSymphony implements Listener {
+
+
+    private String helm;
+    private String chest;
+    private String legs;
+    private String boot;
+    private int nearEntities;
 
     private ItemStack getPeaceHelmet(){
         ItemStack item = new ItemStack(Material.LEATHER_HELMET);
@@ -35,6 +41,11 @@ public class PeacesSymphony implements Listener {
                 ChatColor.GRAY + "- Speed I",
                 ChatColor.GRAY + "- Regeneration I"));
         meta.setLocalizedName("symp_helmet");
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 3, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
         item.setItemMeta(meta);
         return item;
     }
@@ -57,6 +68,12 @@ public class PeacesSymphony implements Listener {
                 ChatColor.GRAY + "- Speed I",
                 ChatColor.GRAY + "- Regeneration I"));
         meta.setLocalizedName("symp_chestplate");
+
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 8, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
         item.setItemMeta(meta);
         return item;
     }
@@ -80,6 +97,13 @@ public class PeacesSymphony implements Listener {
                 ChatColor.GRAY + "- Speed I",
                 ChatColor.GRAY + "- Regeneration I"));
         meta.setLocalizedName("symp_leggins");
+
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 6, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
+
         item.setItemMeta(meta);
         return item;
     }
@@ -102,36 +126,62 @@ public class PeacesSymphony implements Listener {
                 ChatColor.GRAY + "- Speed I",
                 ChatColor.GRAY + "- Regeneration I"));
         meta.setLocalizedName("symp_boots");
+
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 3, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
         item.setItemMeta(meta);
         return item;
     }
 
-    private Boolean isPeaceSet(Player p){
-        System.out.println("Checking for full set.");
+    public Boolean isPeaceSet(Player p){
 
-        String helm = p.getInventory().getHelmet().getItemMeta().getLocalizedName();
-        String chest = p.getInventory().getChestplate().getItemMeta().getLocalizedName();
-        String legs = p.getInventory().getLeggings().getItemMeta().getLocalizedName();
-        String boot = p.getInventory().getBoots().getItemMeta().getLocalizedName();
+        helm = "placeholder1";
+        chest = "placeholder2";
+        legs = "placeholder3";
+        boot = "placeholder4";
 
-        if (helm.equals("a_helmet") && chest.equals("a_chestplate") && legs.equals("a_leggins") && boot.equals("a_boots")){
+        if (p.getInventory().getHelmet() != null){
+            helm  = p.getInventory().getHelmet().getItemMeta().getLocalizedName();
+        }
+        if (p.getInventory().getChestplate() != null){
+            chest = p.getInventory().getChestplate().getItemMeta().getLocalizedName();
+        }
+        if (p.getInventory().getLeggings() != null){
+            legs = p.getInventory().getLeggings().getItemMeta().getLocalizedName();
+        }
+        if (p.getInventory().getBoots() != null){
+            boot = p.getInventory().getBoots().getItemMeta().getLocalizedName();
+        }
+
+        if (helm.equals("symp_helmet") && chest.equals("symp_chestplate") && legs.equals("symp_leggins") && boot.equals("symp_boots")){
+            helm = "placeholder1";
+            chest = "placeholder2";
+            legs = "placeholder3";
+            boot = "placeholder4";
             return true;
         }
         return false;
     }
 
-
-    @EventHandler
-    public void playerInCombat(PlayerInteractEvent e){
-        Player p = e.getPlayer();
-
-        if (isPeaceSet(p)){
-
-            p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20, 1, true, true, true));
-            p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20, 1, true, true, true));
+    public void checkForPeaceArmor(){
+        nearEntities = 0;
+        for (Player p : Bukkit.getOnlinePlayers()){
+            for (Entity e : p.getNearbyEntities(5,5,5)) {
+                if (e instanceof Player){
+                    nearEntities = nearEntities + 1;
+                }
+            }
+            if (nearEntities == 0 && isPeaceSet(p)) {
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 0, true, false, true));
+                p.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, 100, 2, false, false, false));
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SATURATION, 100, 0, true, false, true));
+                p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 0, true, false, true));
+            }
         }
     }
-
 
     public void getItems(Player p){
         p.getInventory().addItem(getPeaceHelmet(), getPeaceChestplate(), getPeaceLeggings(), getPeaceBoots());

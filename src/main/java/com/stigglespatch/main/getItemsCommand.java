@@ -1,6 +1,7 @@
 package com.stigglespatch.main;
 
 import com.stigglespatch.main.Custom.Items.Armor.AnarchysWardrobe;
+import com.stigglespatch.main.Custom.Items.Armor.PeacesSymphony;
 import com.stigglespatch.main.Custom.Items.Bows.BoomBow;
 import com.stigglespatch.main.Custom.Items.Bows.GlowBow;
 import com.stigglespatch.main.Custom.Items.Pickaxes;
@@ -17,6 +18,7 @@ public class getItemsCommand implements CommandExecutor {
     BoomBow boomBow = new BoomBow();
     GlowBow glowBow = new GlowBow();
     AnarchysWardrobe anarchysWardrobe = new AnarchysWardrobe();
+    PeacesSymphony peacesSymphony = new PeacesSymphony();
 
 
     @Override
@@ -30,6 +32,7 @@ public class getItemsCommand implements CommandExecutor {
             p.getInventory().addItem(swords.getTheMagmaCutlass());
             p.getInventory().addItem(boomBow.getBoomBowPlayer(p));
             p.getInventory().addItem(glowBow.getGlowBowPlayer());
+            peacesSymphony.getItems(p);
             anarchysWardrobe.getItems(p);
         }
 

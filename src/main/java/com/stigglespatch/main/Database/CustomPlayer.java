@@ -41,7 +41,7 @@ public class CustomPlayer {
                 logOffY = 64;
                 logOffZ = 0;
                 System.out.println ("Initialized values.");
-                PreparedStatement statement1 = main.getDatabase().getConnection().prepareStatement("INSERT INTO player_info (ID, UUID, RANK, NAME, LOG_OFF_WORLD, LOG_OFF_X, LOG_OFF_Y, LOG_OFF_Z) VALUES (" +
+                PreparedStatement statement1 = main.getDatabase().getConnection().prepareStatement("INSERT INTO player (ID, UUID, RANK, NAME, LOG_OFF_WORLD, LOG_OFF_X, LOG_OFF_Y, LOG_OFF_Z) VALUES (" +
                         "default," +
                         "'" + uuid.toString() +"'," +
                         "'" + rank +"'," +
@@ -60,7 +60,7 @@ public class CustomPlayer {
     public void setRank(String rank) {
         this.rank = rank;
         try {
-            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player_info SET RANK = '" + rank + "' WHERE ``UUID`` = '" + uuid + "';");
+            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player SET RANK = '" + rank + "' WHERE ``UUID`` = '" + uuid + "';");
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -69,7 +69,7 @@ public class CustomPlayer {
     public void setLogOffWorld(String world){
         this.logOffWorld = world;
         try {
-            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player_info SET LOG_OFF_WORLD = '" + world + "' WHERE UUID = '" + uuid + "';");
+            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player SET LOG_OFF_WORLD = '" + world + "' WHERE UUID = '" + uuid + "';");
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -78,7 +78,7 @@ public class CustomPlayer {
     public void setLogOffX(int x){
         this.logOffZ = x;
         try {
-            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player_info SET LOG_OFF_X = " + x + " WHERE UUID = '" + uuid + "';");
+            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player SET LOG_OFF_X = " + x + " WHERE UUID = '" + uuid + "';");
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -89,7 +89,7 @@ public class CustomPlayer {
     public void setLogOffY(int y){
         this.logOffY = y;
         try {
-            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player_info SET LOG_OFF_Y = '" + y + "' WHERE UUID = '" + uuid + "';");
+            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player SET LOG_OFF_Y = '" + y + "' WHERE UUID = '" + uuid + "';");
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -99,7 +99,7 @@ public class CustomPlayer {
     public void setLogOffZ(int z){
         this.logOffZ = z;
         try {
-            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player_info SET LOG_OFF_Z = '" + z + "' WHERE UUID = '" + uuid + "';");
+            PreparedStatement statement=  main.getDatabase().getConnection().prepareStatement("UPDATE player SET LOG_OFF_Z = '" + z + "' WHERE UUID = '" + uuid + "';");
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
