@@ -1,6 +1,8 @@
 package com.stigglespatch.main;
 
-import com.stigglespatch.main.Custom.Enchants.Smelter;
+import com.stigglespatch.main.Custom.Entities.Entities;
+import com.stigglespatch.main.Custom.Entities.LostMerchant.LostMerchant;
+import com.stigglespatch.main.Custom.Entities.LostMerchant.MerchantListener;
 import com.stigglespatch.main.Custom.Items.Armor.AnarchysWardrobe;
 import com.stigglespatch.main.Custom.Items.Armor.PeacesSymphony;
 import com.stigglespatch.main.Custom.Items.Bows.BoomBow;
@@ -17,34 +19,33 @@ import com.stigglespatch.main.Misc.SMPCommand;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
+
+import static java.lang.System.*;
 
 
 public final class Main extends JavaPlugin implements Listener {
     public static ArrayList roomsFinished = new ArrayList<Cuboid>();
     public static ArrayList zombieSpawnRooms = new ArrayList<Cuboid>();
     public static boolean closedBossEntry = false;
+    public boolean blazingBeastSpawned = false;
 
 
     private Database database;
@@ -57,6 +58,7 @@ public final class Main extends JavaPlugin implements Listener {
     //DungeonMobs dungeonMobs = new DungeonMobs();
     private PlayerManager playerManager;
     PeacesSymphony peacesSymphony = new PeacesSymphony();
+    LostMerchant merchant = new LostMerchant();
     public final NamespacedKey pendant = new NamespacedKey(this, "pendant");
 
 
@@ -72,12 +74,15 @@ public final class Main extends JavaPlugin implements Listener {
         }
         playerManager = new PlayerManager();
 
+        //40 93 792
+
         Bukkit.getPluginCommand("dungeon").setExecutor(new DungeonCommand(this));
         Bukkit.getPluginCommand("smp").setExecutor(new SMPCommand());
         Bukkit.getPluginCommand("creative").setExecutor(new CreativeCommand());
         Bukkit.getPluginCommand("start-dungeon").setExecutor(new DungeonStartCommand());
         Bukkit.getPluginCommand("check").setExecutor(new CheckCommand());
         Bukkit.getPluginCommand("get-items").setExecutor(new getItemsCommand());
+        Bukkit.getPluginCommand("strayGroup").setExecutor(new doStrayThing(this));
 
         if (Bukkit.getWorld("smp_cinco") == null) {
             Bukkit.getServer().createWorld(new WorldCreator("smp_cinco"));
@@ -85,7 +90,7 @@ public final class Main extends JavaPlugin implements Listener {
         if (Bukkit.getWorld("testdungeon") == null) {
             Bukkit.getServer().createWorld(new WorldCreator("testdungeon"));
         }
-        System.out.println("Generated the third-party worlds.");
+        out.println("Generated the third-party worlds.");
 
         Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
@@ -97,12 +102,27 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new Pickaxes(), this);
         Bukkit.getPluginManager().registerEvents(new AnarchysWardrobe(), this);
         Bukkit.getPluginManager().registerEvents(new PeacesSymphony(), this);
+        Bukkit.getPluginManager().registerEvents(new Entities(), this);
+        Bukkit.getPluginManager().registerEvents(new MerchantListener(), this);
+
+        merchant.spawnMerchantRep(new Location(Bukkit.getWorld("world"), 40, 93, 792));
 
         new BukkitRunnable() {
             public void run() {
                 peacesSymphony.checkForPeaceArmor();
             }
         }.runTaskTimer(this, 0, 40);
+
+        new BukkitRunnable() { public void run() {
+            spawnStrayGroup(); }
+        }.runTaskTimer(this, 20*30, 20*(60*10));
+
+        new BukkitRunnable() { public void run() {
+            startForBlazingBeast(); }
+        }.runTaskTimer(this, 20*30, 20*(60*30));
+        new BukkitRunnable() { public void run() {
+            merchantTime(); }
+        }.runTaskTimer(this, 20*30, 20*(60*30));
 
         //CUSTOM CRAFTING RECIPES
 
@@ -112,14 +132,11 @@ public final class Main extends JavaPlugin implements Listener {
         customItem.setItemMeta(meta);
 
 
-        ItemStack book = new ItemStack(Material.ENCHANTED_BOOK);
-        ItemMeta bookmeta = customItem.getItemMeta();
-        bookmeta.addEnchant(Enchantment.DAMAGE_ALL, 5 ,true);
-        book.setItemMeta(bookmeta);
 
-        ItemStack item = new ItemStack(Material.EMERALD);
+        /*
+        ItemStack emerladBlade = new ItemStack(Material.EMERALD);
         ItemMeta emeraldItemMeta = customItem.getItemMeta();
-        item.getItemMeta();
+        emerladBlade.getItemMeta();
         emeraldItemMeta.addEnchant(Enchantment.DAMAGE_ALL, 5 ,true);
         emeraldItemMeta.setUnbreakable(true);
         emeraldItemMeta.setDisplayName(ChatColor.GREEN + "Emerald Dagger");
@@ -133,12 +150,13 @@ public final class Main extends JavaPlugin implements Listener {
                 ChatColor.GRAY + "the dagger has a chance",
                 ChatColor.GRAY + "to deal 15-35 damage."));
         emeraldItemMeta.setLocalizedName("emerald_dagger");
-        item.setItemMeta(emeraldItemMeta);
+        emerladBlade.setItemMeta(emeraldItemMeta);
 
-        ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(this, "enchant"), item);
+        ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(this, "enchant"), emerladBlade);
         recipe.addIngredient(Material.ENCHANTED_BOOK);
         recipe.addIngredient(new RecipeChoice.ExactChoice(customItem));
         Bukkit.addRecipe(recipe);
+        */
     }
 
     private void getEntitiesInRoom(Cuboid collectionRoom) {
@@ -150,6 +168,200 @@ public final class Main extends JavaPlugin implements Listener {
             } else if (block.getType().equals(Material.CYAN_CANDLE)){
                 DungeonMobs.spawnDungeonCreeper(block.getLocation().add(0,1,0));
             }
+        }
+    }
+
+    public void spawnStrayGroup(){
+        for(Player player : Bukkit.getOnlinePlayers()){
+            for(Entity e : player.getNearbyEntities(128, 128, 128)){
+                if (e instanceof Stray){
+                    if (Entities.rollNumber(1,5) == 5){
+                        Bukkit.getWorld("world").strikeLightning(e.getLocation());
+                        Entities.spawnStrayGroup(e.getLocation());
+                        e.remove();
+                        player.sendMessage(ChatColor.RED + "[Warning] A stray group has spawned near you, stay on the lookout!");
+                    }
+                }
+            }
+        }
+    }
+
+    public void startForBlazingBeast(){
+        Cuboid beastTower = new Cuboid(
+                new Location(Bukkit.getWorld("world_nether"), 99, 206, 228),
+                new Location(Bukkit.getWorld("world_nether"), 93, 206, 222));
+        if (!blazingBeastSpawned) {
+            for(Block block : beastTower.getBlocks()){
+                block.setType(Material.BARRIER);
+            }
+            new BukkitRunnable() { public void run() {
+                for(Block block : beastTower.getBlocks()){
+                    block.setType(Material.AIR);
+                }
+                }
+            }.runTaskLater(this, 20*(60*25));
+            spawnTheBeast();
+        }
+    }
+
+    public void spawnTheBeast(){
+
+        groupLighning();
+        groupLighning();
+        groupLighning();
+        groupLighning();
+        groupLighning();
+        groupLighning();
+        groupLighning();
+        groupLighning();
+        groupLighning();
+        groupLighning();
+
+        for (Player p : Bukkit.getOnlinePlayers()){
+            if (p.getWorld().getName().equals("world_nether")) {
+                p.sendMessage(ChatColor.RED+"The Blazing Beast has spawned! Take this opportunity to acquire a rare and unique custom item!");
+                p.playSound(p, Sound.ENTITY_ENDER_DRAGON_AMBIENT, 15, .1F);
+                p.playSound(p, Sound.ENTITY_DRAGON_FIREBALL_EXPLODE, 15, .01F);
+                p.playSound(p, Sound.ENTITY_ENDER_DRAGON_GROWL, 15, .1F);
+            }
+        }
+
+        Entities.spawnBlazingBeast(new Location(Bukkit.getWorld("world_nether"),96 ,206 ,225));
+        blazingBeastSpawned = true;
+    }
+
+    private void groupLighning() {
+        new BukkitRunnable() { public void run() {
+            Bukkit.getWorld("world_nether").strikeLightningEffect(new Location(Bukkit.getWorld("world_nether"),96 ,206 ,225));
+        }
+        }.runTaskLater(this, 15);
+    }
+
+    @EventHandler
+    public void onKill(EntityDeathEvent e){
+        if (e.getEntity().getCustomName() != null && e.getEntity().getCustomName().equals(ChatColor.GOLD + "Blazing Beast") && e.getEntity().getKiller() != null){
+            blazingBeastSpawned = false;
+            if (e.getEntity().getKiller() != null){
+                Player p = e.getEntity().getKiller();
+                p.sendMessage(ChatColor.GREEN + "The " + ChatColor.GOLD + "Magma Cutlass " + ChatColor.GREEN + "has been dropped as a reward for killing the Blazing Beast!");
+                p.playSound(p.getLocation(), Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 10, 1);
+                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 10, .5F);
+
+                ItemStack cutlass = new ItemStack(Material.MAGMA_CREAM);
+                ItemMeta meta = cutlass.getItemMeta();
+                meta.setUnbreakable(true);
+                meta.setDisplayName(ChatColor.GOLD + "Magma Cutlass");
+                meta.setLore(Arrays.asList(
+                        ChatColor.GRAY +  "",
+                        ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                        ChatColor.GRAY + "When right-clicked, it uses 1",
+                        ChatColor.GRAY + "experience level to shoot a",
+                        ChatColor.GRAY + "flaming arrow in the direction",
+                        ChatColor.GRAY + "you are facing.",
+                        "",
+                        ChatColor.GRAY + "While taking damage by fire,",
+                        ChatColor.GRAY + "you will deal significantly more",
+                        ChatColor.GRAY + "damage to all entities."));
+                meta.setLocalizedName("magma_cutlass");
+                cutlass.setItemMeta(meta);
+
+                Bukkit.getWorld("world_nether").dropItemNaturally(e.getEntity().getLocation(), cutlass);
+
+                Cuboid beastTower = new Cuboid(
+                        new Location(Bukkit.getWorld("world_nether"), 99, 206, 228),
+                        new Location(Bukkit.getWorld("world_nether"), 93, 206, 222));
+                for (Block block : beastTower.getBlocks()){
+                    block.setType(Material.SOUL_SAND);
+                }
+
+                killAfterSpawns(e.getEntity().getKiller());
+            }
+
+
+        }
+    }
+
+    private void killAfterSpawns(Entity e) {
+        new BukkitRunnable() {
+            public void run() {
+                for (Entity magma : e.getNearbyEntities(100, 100, 100)) {
+                    if (magma instanceof MagmaCube) {
+                        magma.remove();
+                    }
+                }
+            }
+        }.runTaskLater(this, 5);
+        new BukkitRunnable() {
+            public void run() {
+                for (Entity magma : e.getNearbyEntities(100, 100, 100)) {
+                    if (magma instanceof MagmaCube) {
+                        magma.remove();
+                    }
+                }
+            }
+        }.runTaskLater(this, 5);
+        new BukkitRunnable() {
+            public void run() {
+                for (Entity magma : e.getNearbyEntities(100, 100, 100)) {
+                    if (magma instanceof MagmaCube) {
+                        magma.remove();
+                    }
+                }
+            }
+        }.runTaskLater(this, 5);
+        new BukkitRunnable() {
+            public void run() {
+                for (Entity magma : e.getNearbyEntities(100, 100, 100)) {
+                    if (magma instanceof MagmaCube) {
+                        magma.remove();
+                    }
+                }
+            }
+        }.runTaskLater(this, 5);
+        new BukkitRunnable() {
+            public void run() {
+                for (Entity magma : e.getNearbyEntities(100, 100, 100)) {
+                    if (magma instanceof MagmaCube) {
+                        magma.remove();
+                    }
+                }
+            }
+        }.runTaskLater(this, 5);
+        new BukkitRunnable() {
+            public void run() {
+                for (Entity magma : e.getNearbyEntities(100, 100, 100)) {
+                    if (magma instanceof MagmaCube) {
+                        magma.remove();
+                    }
+                }
+            }
+        }.runTaskLater(this, 5);
+    }
+
+    private void merchantTime() {
+        int spawnSpot = rollNumber(1,10);
+        if (spawnSpot == 1) {
+
+        } else if (spawnSpot == 2){
+
+        } else if (spawnSpot == 3){
+
+        } else if (spawnSpot == 4){
+
+        } else if (spawnSpot == 5){
+
+        } else if (spawnSpot == 6){
+
+        } else if (spawnSpot == 7){
+
+        } else if (spawnSpot == 8){
+
+        } else if (spawnSpot == 9){
+
+        } else if (spawnSpot == 10){
+
+        } else {
+
         }
     }
 
@@ -181,37 +393,32 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onDeath(PlayerDeathEvent e) {
-        /*
-        Player p = (Player) e.getEntity();
-        if (dSC.getPlayersList().contains(p)){
-            p.setAllowFlight(true);
-            p.setFlying(true);
-            p.setInvisible(true);
+    public void onPortal(PortalCreateEvent e) {
+        if(!e.getEntity().isOp()){
+            e.setCancelled(true);
         }
-        if (dSC.getAlivePlayers().contains(p)){
-            dSC.getAlivePlayers().remove(p);
+    }
+    @EventHandler
+    public void onNether(PlayerChangedWorldEvent e) {
+        if (e.getFrom().getName().equals("world")) {
+            e.getPlayer().teleport(new Location(Bukkit.getWorld("world_nether"), 68, 194, 61, -180, 0));
+        } else if (e.getFrom().getName().equals("world_nether")){
+            e.getPlayer().teleport(new Location(Bukkit.getWorld("world"),6, 92, 779, -90, 0));
         }
-
-        if (dSC.getAlivePlayers().size() == 0){
-            Bukkit.broadcastMessage(ChatColor.YELLOW +"The dungeon has been reset! Do /start-dungeon to begin!");
-            roomsFinished.clear();
-            for (Player player : dSC.getPlayersList()) {
-                player.setGameMode(GameMode.ADVENTURE);
-                player.setInvisible(false);
-                player.setAllowFlight(false);
-                player.setFlying(false);
-            }
-            dSC.getPlayersList().clear();
-            dSC.getAlivePlayers().clear();
-        }*/
-
-
     }
 
     public Database getDatabase() { return database; }
     public PlayerManager getPlayerManager() { return playerManager; }
     public NamespacedKey getNamespacedKey() { return pendant; }
+
+    public static int rollNumber(int min, int max){
+        Random rand = new Random();
+        int randomNumber = rand.nextInt(max) + min;
+
+        return randomNumber;
+    }
+
+
 
 }
 
@@ -434,4 +641,16 @@ RETRIEVE DATA FROM DATABASE
                     getEntitiesInRoom(mobRoomLava);
                 }
             }
-        },0, timeBeforeNextSpawn);*/
+        },0, timeBeforeNextSpawn);
+
+                public Location getRandomLocation(Location center, double range) {
+            double x = center.getX() + (Math.random() * range * 2 - range);
+            double y = center.getY();
+            double z = center.getZ() + (Math.random() * range * 2 - range);
+            Location randomLocation = new Location(center.getWorld(), x, y, z);
+            return randomLocation;
+        }
+
+        Location dropLocation = getRandomLocation(loc, borderSize);
+
+        */

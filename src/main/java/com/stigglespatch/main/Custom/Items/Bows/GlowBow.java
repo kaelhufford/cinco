@@ -18,18 +18,20 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class GlowBow implements Listener {
 
     private static final Main plugin = Main.getPlugin(Main.class);
     private static final NamespacedKey glowKey = new NamespacedKey(plugin, "glow_arrow");
+    private String uuidShot;
 
 
     private ItemStack getGlowBow(){
         ItemStack bow = new ItemStack(Material.BOW);
         ItemMeta meta = bow.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName(("Recon Bow"));
+        meta.setDisplayName((ChatColor.WHITE + "Recon Bow"));
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.GOLD +  "-- SPECIAL ITEM --",
@@ -54,8 +56,13 @@ public class GlowBow implements Listener {
         if (!container.has(glowKey, PersistentDataType.STRING)) return;
         if (container.get(glowKey, PersistentDataType.STRING).equals("glow_arrow")) {
             for (Entity entity : e.getEntity().getNearbyEntities(20,20,20)){
-                if (entity instanceof Mob){
-                    ((Mob) entity).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 10, true, false, true));
+                if (entity.equals(uuidShot)){
+                    if (entity instanceof Mob) {
+                        ((Mob) entity).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 10, true, false, true));
+
+                    } else if (entity instanceof Player){
+                        ((Player) entity).addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 10, true, false, true));
+                    }
                 }
             }
         }
