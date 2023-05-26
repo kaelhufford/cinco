@@ -6,9 +6,11 @@ import org.bukkit.entity.Villager;
 
 public class LostMerchant {
 
-    public void spawnLostMerchant(Location loc) {
+
+
+    public Villager spawnLostMerchant(Location loc) {
         Villager merchant = loc.getWorld().spawn(loc, Villager.class);
-        merchant.setCustomName(ChatColor.AQUA + "The Lost Merhcant");
+        merchant.setCustomName(ChatColor.AQUA + "Lost Merhcant");
         merchant.setCustomNameVisible(true);
         merchant.setAdult();
         merchant.setInvulnerable(true);
@@ -18,6 +20,16 @@ public class LostMerchant {
         merchant.setVillagerExperience(1);
         merchant.setCanPickupItems(false);
         merchant.setCustomNameVisible(true);
+
+        /*
+        On spawn, assign the inventory with the custom items.
+
+        USE:
+        MERCHANTLISTENER
+        INVENTORYMANAGER
+         */
+
+        return merchant;
     }
 
     public void spawnMerchantRep(Location loc) {

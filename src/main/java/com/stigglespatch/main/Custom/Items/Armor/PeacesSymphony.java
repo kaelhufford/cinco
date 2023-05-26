@@ -22,7 +22,7 @@ public class PeacesSymphony implements Listener {
     private String boot;
     private int nearEntities;
 
-    private ItemStack getPeaceHelmet(){
+    public ItemStack getPeaceHelmet(){
         ItemStack item = new ItemStack(Material.LEATHER_HELMET);
         LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
         meta.setUnbreakable(true);
@@ -49,7 +49,7 @@ public class PeacesSymphony implements Listener {
         item.setItemMeta(meta);
         return item;
     }
-    private ItemStack getPeaceChestplate(){
+    public ItemStack getPeaceChestplate(){
         ItemStack item = new ItemStack(Material.LEATHER_CHESTPLATE);
         LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
         meta.setUnbreakable(true);
@@ -78,7 +78,7 @@ public class PeacesSymphony implements Listener {
         return item;
     }
 
-    private ItemStack getPeaceLeggings(){
+    public ItemStack getPeaceLeggings(){
         ItemStack item = new ItemStack(Material.LEATHER_LEGGINGS);
         LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
         meta.setUnbreakable(true);
@@ -107,7 +107,7 @@ public class PeacesSymphony implements Listener {
         item.setItemMeta(meta);
         return item;
     }
-    private ItemStack getPeaceBoots(){
+    public ItemStack getPeaceBoots(){
         ItemStack item = new ItemStack(Material.LEATHER_BOOTS);
         LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
         meta.setUnbreakable(true);

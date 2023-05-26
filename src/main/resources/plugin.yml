@@ -21,4 +21,6 @@ commands:
     description: a
   strayGroup:
     description: b
+  spawn-merchant:
+    description: c
 

@@ -3,7 +3,9 @@ package com.stigglespatch.main;
 import com.stigglespatch.main.Custom.Entities.Entities;
 import com.stigglespatch.main.Custom.Entities.LostMerchant.LostMerchant;
 import com.stigglespatch.main.Custom.Entities.LostMerchant.MerchantListener;
+import com.stigglespatch.main.Custom.InventoryManager;
 import com.stigglespatch.main.Custom.Items.Armor.AnarchysWardrobe;
+import com.stigglespatch.main.Custom.Items.Armor.LunarArmor;
 import com.stigglespatch.main.Custom.Items.Armor.PeacesSymphony;
 import com.stigglespatch.main.Custom.Items.Bows.BoomBow;
 import com.stigglespatch.main.Custom.Items.Bows.GlowBow;
@@ -28,6 +30,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.PortalCreateEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,6 +39,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import static java.lang.System.*;
@@ -58,14 +62,18 @@ public final class Main extends JavaPlugin implements Listener {
     //DungeonMobs dungeonMobs = new DungeonMobs();
     private PlayerManager playerManager;
     PeacesSymphony peacesSymphony = new PeacesSymphony();
+    LunarArmor lunarArmor = new LunarArmor();
     LostMerchant merchant = new LostMerchant();
+    InventoryManager inventoryManager = new InventoryManager();
+    MerchantListener merchantListener = new MerchantListener(this);
     public final NamespacedKey pendant = new NamespacedKey(this, "pendant");
-
+    Inventory placeholderInventory;
 
     DungeonManager dm = new DungeonManager(this);
 
     @Override
     public void onEnable() {
+
         database = new Database();
         try {
             database.connect();
@@ -83,6 +91,7 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginCommand("check").setExecutor(new CheckCommand());
         Bukkit.getPluginCommand("get-items").setExecutor(new getItemsCommand());
         Bukkit.getPluginCommand("strayGroup").setExecutor(new doStrayThing(this));
+        Bukkit.getPluginCommand("spawn-merchant").setExecutor(new spawnMerchant());
 
         if (Bukkit.getWorld("smp_cinco") == null) {
             Bukkit.getServer().createWorld(new WorldCreator("smp_cinco"));
@@ -103,7 +112,7 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new AnarchysWardrobe(), this);
         Bukkit.getPluginManager().registerEvents(new PeacesSymphony(), this);
         Bukkit.getPluginManager().registerEvents(new Entities(), this);
-        Bukkit.getPluginManager().registerEvents(new MerchantListener(), this);
+        Bukkit.getPluginManager().registerEvents(new MerchantListener(this), this);
 
         merchant.spawnMerchantRep(new Location(Bukkit.getWorld("world"), 40, 93, 792));
 
@@ -112,11 +121,14 @@ public final class Main extends JavaPlugin implements Listener {
                 peacesSymphony.checkForPeaceArmor();
             }
         }.runTaskTimer(this, 0, 40);
-
+        new BukkitRunnable() {
+            public void run() {
+                lunarArmor.checkForLunarArmor();
+            }
+        }.runTaskTimer(this, 0, 40);
         new BukkitRunnable() { public void run() {
             spawnStrayGroup(); }
         }.runTaskTimer(this, 20*30, 20*(60*10));
-
         new BukkitRunnable() { public void run() {
             startForBlazingBeast(); }
         }.runTaskTimer(this, 20*30, 20*(60*30));
@@ -341,9 +353,12 @@ public final class Main extends JavaPlugin implements Listener {
     private void merchantTime() {
         int spawnSpot = rollNumber(1,10);
         if (spawnSpot == 1) {
+            //54, 101, 785
+            Villager vilTheVillager = merchant.spawnLostMerchant(new Location(Bukkit.getWorld("world"),54, 101, 785)); //Make villager
+            inventoryManager.setInvMap(vilTheVillager.getUniqueId(), inventoryManager.getInventoryFromMap(vilTheVillager.getUniqueId())); //Assign inventory
 
         } else if (spawnSpot == 2){
-
+            //
         } else if (spawnSpot == 3){
 
         } else if (spawnSpot == 4){

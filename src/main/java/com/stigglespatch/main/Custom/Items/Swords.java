@@ -19,10 +19,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class Swords implements Listener {
-
-    private static final Main plugin = Main.getPlugin(Main.class);
-    private static final NamespacedKey fireKey = new NamespacedKey(plugin, "magama_arrow_key");
-
     private int rollNumber(int min, int max){
         Random rand = new Random();
         int randomNumber = rand.nextInt(max) + min;
