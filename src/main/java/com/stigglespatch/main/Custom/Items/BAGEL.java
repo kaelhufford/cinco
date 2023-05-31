@@ -26,5 +26,20 @@ public class BAGEL {
         return item;
     }
     //BLUEBERRY BAGEL YUM
+    public ItemStack getDaShopperBagel() {
+        ItemStack item = new ItemStack(Material.PUMPKIN_PIE);
+        ItemMeta meta = item.getItemMeta();
+        meta.setUnbreakable(false);
+        meta.setDisplayName(ChatColor.WHITE + "Bagel");
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.YELLOW +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "You eat bagel- yummy",
+                ChatColor.GRAY.toString() + ChatColor.ITALIC + "Chomp-Chew-Crunch-Chomp-Crunch",
+                ChatColor.AQUA + "Costs: 5 Wheat"));
+        meta.setLocalizedName("b_a_g_e_l");
+        item.setItemMeta(meta);
+        return item;
+    }
 
 }

@@ -144,6 +144,21 @@ public class LunarArmor {
 
         return item;
     }
+    public ItemStack getShoppingMoonShards(int amount) {
+        ItemStack item = new ItemStack(Material.PRISMARINE_SHARD, amount);
+        ItemMeta meta = item.getItemMeta();
+        meta.setUnbreakable(false);
+        meta.setDisplayName(ChatColor.AQUA + "Moon Shards");
+        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.AQUA +  "-- SPECIAL ITEM --",
+                ChatColor.AQUA + "Costs: 64 End Stone"));
+        meta.setLocalizedName("moon_shard");
+        item.setItemMeta(meta);
+
+        return item;
+    }
 
     public Boolean isLunarSet(Player p){
 

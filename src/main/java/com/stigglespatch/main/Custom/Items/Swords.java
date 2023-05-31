@@ -53,8 +53,29 @@ public class Swords implements Listener {
         item.setItemMeta(meta);
         return item;
     }
+    private ItemStack getShopEmeraldDagger(){
+        ItemStack item = new ItemStack(Material.EMERALD);
+        ItemMeta meta = item.getItemMeta();
+        meta.setUnbreakable(true);
+        meta.setDisplayName(ChatColor.GREEN + "Emerald Dagger");
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "Has a random chance to drop",
+                ChatColor.GRAY + "multiple emeralds on a kill. ",
+                ChatColor.GRAY + "",
+                ChatColor.GRAY + "Reveals a special ability once",
+                ChatColor.GRAY + "purchased.",
+                ChatColor.AQUA + "Costs: 16 Emerald Blocks"));
+        meta.setLocalizedName("emerald_dagger");
+        item.setItemMeta(meta);
+        return item;
+    }
     public ItemStack getTheEmeraldDagger(){
         return getEmeraldDagger();
+    }
+    public ItemStack getTheShopsEmeraldDagger(){
+        return getShopEmeraldDagger();
     }
     private boolean isEmeraldDagger(ItemStack item) {
         if (item == null) {

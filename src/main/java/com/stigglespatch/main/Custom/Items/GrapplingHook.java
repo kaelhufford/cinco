@@ -26,4 +26,18 @@ public class GrapplingHook {
         return item;
     }
 
+    public ItemStack getShopHook(){
+        ItemStack item = new ItemStack(Material.FISHING_ROD);
+        ItemMeta meta = item.getItemMeta();
+        meta.setUnbreakable(false);
+        meta.setDisplayName(ChatColor.AQUA + "Grappling Hook");
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.AQUA +  "-- SPECIAL ITEM --",
+                ChatColor.AQUA + "Costs: 64 String & Fishing Rod"));
+        meta.setLocalizedName("grappling_hook");
+        item.setItemMeta(meta);
+        return item;
+    }
+
 }

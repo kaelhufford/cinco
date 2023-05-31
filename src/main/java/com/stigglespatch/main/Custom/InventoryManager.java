@@ -109,32 +109,32 @@ public class InventoryManager {
     public ItemStack getCustomTradeItems(int roll){
         if (roll == 1) {
             //Grappling hook
-            return grapplingHook.getHook();
+            return grapplingHook.getShopHook();
 
         } else if (roll == 2) {
             //Emerald Blade
-            return swords.getTheEmeraldDagger();
+            return swords.getTheShopsEmeraldDagger();
         } else if (roll == 3){
             //Moon Shards
-            return lunarArmor.getMoonShards(Main.rollNumber(1,8));
+            return lunarArmor.getShoppingMoonShards(Main.rollNumber(1,8));
         } else if (roll == 4){
             int armorRoll = Main.rollNumber(1,4);
 
             if (armorRoll == 1) {
-                return peacesSymphony.getPeaceHelmet();
+                return peacesSymphony.getPeaceHelmet(); //TODO - MAKE THIS RETURN THE SHOPPING ITEMSTACK
             } else if (roll == 2) {
-                return peacesSymphony.getPeaceChestplate();
+                return peacesSymphony.getPeaceChestplate(); //TODO - MAKE THIS RETURN THE SHOPPING ITEMSTACK
             } else if (roll == 3) {
-                return peacesSymphony.getPeaceLeggings();
+                return peacesSymphony.getPeaceLeggings(); //TODO - MAKE THIS RETURN THE SHOPPING ITEMSTACK
             } else if (roll == 4){
-                return peacesSymphony.getPeaceBoots();
+                return peacesSymphony.getPeaceBoots(); //TODO - MAKE THIS RETURN THE SHOPPING ITEMSTACK
             }
         } else if (roll == 5){
             //Bagel
-            return bagel.getThatBagel();
+            return bagel.getDaShopperBagel();
         } else if (roll == 6){
             //Smurf Handy Tool
-            return pickaxes.giveHandyToolPickaxe();
+            return pickaxes.giveShopTool();
         } else {
             Bukkit.getLogger().log(Level.WARNING,"Please give a value 1<=x<=6!, Value being given: " + roll);
         }
@@ -142,102 +142,200 @@ public class InventoryManager {
     }
 
     public ItemStack getMinecraftTradeItems(int roll){
+        ItemStack item;
+        ItemMeta meta;
         switch (roll) {
                 case 1:
-                    ItemStack item0 = new ItemStack(Material.ROTTEN_FLESH);
-                    ItemMeta meta0 = item0.getItemMeta();
-                    item0.setItemMeta(meta0);
-                    meta0.setLore(Arrays.asList(
+                    item = new ItemStack(Material.ROTTEN_FLESH, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
                             ChatColor.GRAY +  "To buy this, it costs",
                             ChatColor.AQUA + "8 Emeralds"));
-                    item0.setItemMeta(meta0);
-                    return item0;
+                    item.setItemMeta(meta);
+                    return item;
                 case 2:
-                    ItemStack item1 = new ItemStack(Material.POISONOUS_POTATO);
-                    ItemMeta meta1 = item1.getItemMeta();
-                    item1.setItemMeta(meta1);
-                    meta1.setLore(Arrays.asList(
+                    item = new ItemStack(Material.POISONOUS_POTATO, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
                             ChatColor.GRAY +  "To buy this, it costs",
                             ChatColor.AQUA + "14 Carrots"));
-                    item1.setItemMeta(meta1);
-                    return item1;
+                    item.setItemMeta(meta);
+                    return item;
                 case 3:
-                    // Code for case 3
-                    return new ItemStack(Material.COBWEB, Main.rollNumber(1,10));
+                    item = new ItemStack(Material.COBWEB, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "5 String"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 4:
-                    // Code for case 4
-                    return new ItemStack(Material.DEAD_BUSH, Main.rollNumber(1,10));
+                    item = new ItemStack(Material.DEAD_BUSH, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "9 Sticks"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 5:
-                    // Code for case 5
-                    return new ItemStack(Material.INK_SAC, Main.rollNumber(1,10));
+                    item = new ItemStack(Material.EMERALD_ORE, Main.rollNumber(2,10));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "7 Cooked Chicken"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 6:
-                    // Code for case 6
-                    return new ItemStack(Material.FEATHER, Main.rollNumber(1,10));
+                    item = new ItemStack(Material.FEATHER, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "3 Eggs"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 7:
-                    // Code for case 7
-                    return new ItemStack(Material.PUFFERFISH, Main.rollNumber(1,10));
+                    item = new ItemStack(Material.PUFFERFISH, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "2 Cooked Salmon"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 8:
-                    // Code for case 8
-                    return new ItemStack(Material.SNOWBALL, Main.rollNumber(1,10));
+                    item = new ItemStack(Material.SNOW_GOLEM_SPAWN_EGG);
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "4 Snow blocks"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 9:
-                    // Code for case 9
-                    return new ItemStack(Material.RED_MUSHROOM, Main.rollNumber(1,10));
+                    item = new ItemStack(Material.RED_MUSHROOM, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "6 Brown Mushrooms"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 10:
-                    // Code for case 10
-                    return new ItemStack(Material.WOODEN_HOE);
+                    item = new ItemStack(Material.WOODEN_HOE);
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "11 Wooden Planks"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 11:
-                    // Code for case 11
-                    return new ItemStack(Material.LEATHER_LEGGINGS);
+                    item = new ItemStack(Material.LEATHER_LEGGINGS);
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "1 Leather"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 12:
-                    // Code for case 12
-                    return new ItemStack(Material.STONE_AXE);
+                    item = new ItemStack(Material.STONE_AXE);
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "4 Cobblestone"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 13:
-                    // Code for case 13
-                    return new ItemStack(Material.WOODEN_PICKAXE);
+                    item = new ItemStack(Material.GOLDEN_APPLE, Main.rollNumber(5,10));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "10 Golden Ingots"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 14:
-                    // Code for case 14
-                    return new ItemStack(Material.GOLDEN_CARROT, Main.rollNumber(2,15));
+                    item = new ItemStack(Material.GOLDEN_CARROT, Main.rollNumber(5,10));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "7 Golden Nuggets"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 15:
-                    // Code for case 15
-                    return new ItemStack(Material.ENDER_EYE, Main.rollNumber(1,5));
+                    item = new ItemStack(Material.ENDER_EYE, Main.rollNumber(1,5));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "10 Ender Pearl"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 16:
-                    // Code for case 16
-                    return new ItemStack(Material.SHIELD);
+                    item = new ItemStack(Material.ENCHANTING_TABLE);
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "2 Obsidian"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 17:
-                    // Code for case 17
-                    return new ItemStack(Material.BOW);
+                    item = new ItemStack(Material.BOW);
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "3 String"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 18:
-                    // Code for case 18
-                    return new ItemStack(Material.ARROW, Main.rollNumber(10,32));
+                    item = new ItemStack(Material.ARROW, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "8 Flint"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 19:
-                    // Code for case 19
-                    return new ItemStack(Material.IRON_AXE);
+                    item = new ItemStack(Material.IRON_AXE);
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "2 Iron Ingots"));
+                    item.setItemMeta(meta);
+                    return item;
                 case 20:
-                    // Code for case 20
-                    return new ItemStack(Material.NETHER_WART, Main.rollNumber(1,5));
+                    item = new ItemStack(Material.NETHER_WART, Main.rollNumber(5,20));
+                    meta = item.getItemMeta();
+                    item.setItemMeta(meta);
+                    meta.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "3 Blaze Powder"));
+                    item.setItemMeta(meta);
+                    return item;
             default:
                 Bukkit.getLogger().log(Level.WARNING, "Please give a value 1<=x<=20!");
                 break;
         }
-        return new ItemStack(Material.EMERALD, Main.rollNumber(1,5));
+        item = new ItemStack(Material.EMERALD_ORE, Main.rollNumber(2,10));
+        meta = item.getItemMeta();
+        item.setItemMeta(meta);
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "To buy this, it costs",
+                ChatColor.AQUA + "7 Cooked Chicken"));
+        item.setItemMeta(meta);
+        return item;
     }
-
-    /*
-    Wooden Shovel
-    Leather Pants
-    Wooden Hoe
-    Dirt Block
-    Red Mushroom
-    Pufferfish
-    Snowball
-
-    Stone Sword
-    Golden Carrot
-    Eye of Ender
-    Bucket of Water
-    Shield
-    Splash Potion of Healing
-    Bow (without enchantments)
-     */
-
 }

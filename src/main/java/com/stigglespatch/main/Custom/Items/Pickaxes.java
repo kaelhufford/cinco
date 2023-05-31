@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -47,9 +48,27 @@ public class Pickaxes implements Listener {
         item.setItemMeta(meta);
         return item;
     }
+    private ItemStack getSHOPPPERHandyToolPickaxe(){
+        ItemStack item = new ItemStack(Material.NETHERITE_PICKAXE);
+        ItemMeta meta = item.getItemMeta();
+        meta.setUnbreakable(true);
+        meta.setDisplayName(ChatColor.AQUA + "Smurf's Handy Tool");
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "When mining stone, coal ore,",
+                ChatColor.GRAY +  "iron ore, lapis lazuli,",
+                ChatColor.GRAY +  "gold ore, diamond ore, and",
+                ChatColor.GRAY +  "ancient debris, you mine it faster",
+                ChatColor.AQUA + "Costs: 32 Blue Wool"));
+        meta.setLocalizedName("smurf_handy_tool");
+        item.setItemMeta(meta);
+        return item;
+    }
     public ItemStack giveHandyToolPickaxe(){
         return getHandyToolPickaxe();
     }
+    public ItemStack giveShopTool(){ return getSHOPPPERHandyToolPickaxe(); }
 
     private ItemStack getWardenWeaknessPickaxe(){
         /*
