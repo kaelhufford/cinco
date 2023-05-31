@@ -265,7 +265,7 @@ public class Entities implements Listener {
         new BukkitRunnable(){
             public void run(){
                 if(!blazeIng.isDead()) {
-                    for (Entity entity : blazeIng.getNearbyEntities(256, 256, 256)){
+                    for (Entity entity : blazeIng.getNearbyEntities(256, 32, 256)){
                         if (entity instanceof Player) {
                             Player p = (Player) entity;
                             blazeIng.setTarget(p);
@@ -273,12 +273,15 @@ public class Entities implements Listener {
                             p.getWorld().strikeLightning(p.getLocation());
 
                             p.getWorld().spawnEntity(p.getLocation(), EntityType.MAGMA_CUBE);
+                            p.getWorld().spawnEntity(p.getLocation().add(0,2,0), EntityType.BLAZE);
                         }
                     }
-                    for (Entity entity : blazeIng.getNearbyEntities(20, 256, 20)){
+                    for (Entity entity : blazeIng.getNearbyEntities(32, 32, 32)){
                         if (entity instanceof Player){
                             Player p = (Player) entity;
-                            p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5, 0, false, false));
+                            p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 10, 0, false, false));
+                            p.getWorld().createExplosion(p.getLocation(), 5, false, false);
+
                         }
                     }
                 } else {

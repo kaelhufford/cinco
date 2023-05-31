@@ -31,6 +31,7 @@ public class LunarArmor {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(204, 255, 255));
         meta.setDisplayName(ChatColor.AQUA + "Lunar Helmet");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.AQUA +  "-- SPECIAL ARMOR --",
@@ -54,6 +55,7 @@ public class LunarArmor {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(204, 255, 255));
         meta.setDisplayName(ChatColor.AQUA + "Lunar Chestplate");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.AQUA +  "-- SPECIAL ARMOR --",
@@ -79,6 +81,7 @@ public class LunarArmor {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(204, 255, 255));
         meta.setDisplayName(ChatColor.AQUA + "Lunar Leggings");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.AQUA +  "-- SPECIAL ARMOR --",
@@ -104,6 +107,7 @@ public class LunarArmor {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(204, 255, 255));
         meta.setDisplayName(ChatColor.AQUA + "Lunar Boots");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.AQUA +  "-- SPECIAL ARMOR --",
@@ -123,8 +127,8 @@ public class LunarArmor {
         return item;
     }
 
-    public ItemStack getMoonShards(){
-        ItemStack item = new ItemStack(Material.PRISMARINE_SHARD);
+    public ItemStack getMoonShards(int amount) {
+        ItemStack item = new ItemStack(Material.PRISMARINE_SHARD, amount);
         ItemMeta meta = item.getItemMeta();
         meta.setUnbreakable(false);
         meta.setDisplayName(ChatColor.AQUA + "Moon Shards");

@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
@@ -31,6 +32,7 @@ public class AnarchysWardrobe implements Listener {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(166, 0, 199));
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Anarchy's Helmet");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.LIGHT_PURPLE +  "-- SPECIAL ARMOR --",
@@ -58,6 +60,7 @@ public class AnarchysWardrobe implements Listener {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(166, 0, 199));
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Anarchy's Chestplate");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.LIGHT_PURPLE +  "-- SPECIAL ARMOR --",
@@ -87,6 +90,7 @@ public class AnarchysWardrobe implements Listener {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(166, 0, 199));
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Anarchy's Leggings");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.LIGHT_PURPLE +  "-- SPECIAL ARMOR --",
@@ -115,6 +119,7 @@ public class AnarchysWardrobe implements Listener {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(166, 0, 199));
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Anarchy's Boots");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.LIGHT_PURPLE +  "-- SPECIAL ARMOR --",

@@ -37,10 +37,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static java.lang.System.*;
 
@@ -91,7 +88,7 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginCommand("check").setExecutor(new CheckCommand());
         Bukkit.getPluginCommand("get-items").setExecutor(new getItemsCommand());
         Bukkit.getPluginCommand("strayGroup").setExecutor(new doStrayThing(this));
-        Bukkit.getPluginCommand("spawn-merchant").setExecutor(new spawnMerchant());
+        Bukkit.getPluginCommand("spawn-merchant").setExecutor(new spawnMerchant(this));
 
         if (Bukkit.getWorld("smp_cinco") == null) {
             Bukkit.getServer().createWorld(new WorldCreator("smp_cinco"));
@@ -114,7 +111,7 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new Entities(), this);
         Bukkit.getPluginManager().registerEvents(new MerchantListener(this), this);
 
-        merchant.spawnMerchantRep(new Location(Bukkit.getWorld("world"), 40, 93, 792));
+        //merchant.spawnMerchantRep(new Location(Bukkit.getWorld("world"), 39, 92, 792, 90, 0));
 
         new BukkitRunnable() {
             public void run() {
@@ -134,7 +131,7 @@ public final class Main extends JavaPlugin implements Listener {
         }.runTaskTimer(this, 20*30, 20*(60*30));
         new BukkitRunnable() { public void run() {
             merchantTime(); }
-        }.runTaskTimer(this, 20*30, 20*(60*30));
+        }.runTaskTimer(this, 20*30, 20*(60*10));
 
         //CUSTOM CRAFTING RECIPES
 
@@ -350,34 +347,18 @@ public final class Main extends JavaPlugin implements Listener {
         }.runTaskLater(this, 5);
     }
 
-    private void merchantTime() {
-        int spawnSpot = rollNumber(1,10);
-        if (spawnSpot == 1) {
-            //54, 101, 785
-            Villager vilTheVillager = merchant.spawnLostMerchant(new Location(Bukkit.getWorld("world"),54, 101, 785)); //Make villager
-            inventoryManager.setInvMap(vilTheVillager.getUniqueId(), inventoryManager.getInventoryFromMap(vilTheVillager.getUniqueId())); //Assign inventory
+    public void merchantTime() {
+        World world = Bukkit.getWorld("world"); //World object
 
-        } else if (spawnSpot == 2){
-            //
-        } else if (spawnSpot == 3){
-
-        } else if (spawnSpot == 4){
-
-        } else if (spawnSpot == 5){
-
-        } else if (spawnSpot == 6){
-
-        } else if (spawnSpot == 7){
-
-        } else if (spawnSpot == 8){
-
-        } else if (spawnSpot == 9){
-
-        } else if (spawnSpot == 10){
-
-        } else {
-
+        for(Entity e : world.getEntities()){
+            if (e instanceof Villager){
+                if (e.getCustomName() != null && e.getCustomName().equals(ChatColor.AQUA + "Merchant Marketeer")){
+                    e.remove();
+                }
+            }
         }
+        doMerchantyThing(world);
+
     }
 
     @Override
@@ -428,9 +409,70 @@ public final class Main extends JavaPlugin implements Listener {
 
     public static int rollNumber(int min, int max){
         Random rand = new Random();
-        int randomNumber = rand.nextInt(max) + min;
+        int randomNumber = rand.nextInt(max - min + 1) + min;
 
         return randomNumber;
+    }
+
+    private void doMerchantyThing(World world) {
+        inventoryManager.getMerchantUUIDMap().clear(); //Clear the map
+
+        //Community Center Villager
+        Villager vilTheVillager = merchant.spawnLostMerchant(new Location(world, 54, 101, 785)); //Make villager
+
+
+        int spawnSpot = rollNumber(1, 9);
+        if (spawnSpot == 1) {
+            //Snowy Villager
+            merchant.spawnLostMerchant(new Location(world, 1332, 12, 3 - 824));
+            merchant.spawnLostMerchant(new Location(world, -904, 72, 1517));
+            merchant.spawnLostMerchant(new Location(world, 1123, 67, -203));
+        } else if (spawnSpot == 2) {
+            //Plains Villager
+            merchant.spawnLostMerchant(new Location(world, -302, 69, 315));
+            merchant.spawnLostMerchant(new Location(world, -904, 72, 1517));
+            merchant.spawnLostMerchant(new Location(world, 1332, 12, 3 - 824));
+        } else if (spawnSpot == 3) {
+            //Jungle Villager
+            merchant.spawnLostMerchant(new Location(world, -904, 72, 1517));
+            merchant.spawnLostMerchant(new Location(world, 1332, 12, 3 - 824));
+            merchant.spawnLostMerchant(new Location(world, 1123, 67, -203));
+        } else if (spawnSpot == 4) {
+            //Desert Villager
+            merchant.spawnLostMerchant(new Location(world, -903, 72, 701));
+            merchant.spawnLostMerchant(new Location(world, -904, 72, 1517));
+            merchant.spawnLostMerchant(new Location(world, -904, 72, 1517));
+        } else if (spawnSpot == 5) {
+            //Mesa Villager
+            merchant.spawnLostMerchant(new Location(world, -904, 72, 1517));
+            merchant.spawnLostMerchant(new Location(world, -456, 117, -1195));
+            merchant.spawnLostMerchant(new Location(world, 1123, 67, -203));
+        } else if (spawnSpot == 6) {
+            //Savanna Villager
+            merchant.spawnLostMerchant(new Location(world, -873, 66, -312));
+            merchant.spawnLostMerchant(new Location(world, 1332, 12, 3 - 824));
+            merchant.spawnLostMerchant(new Location(world, 816, 110, 510));
+        } else if (spawnSpot == 7) {
+            //Forest Villager
+            merchant.spawnLostMerchant(new Location(world, 816, 110, 510));
+            merchant.spawnLostMerchant(new Location(world, 1123, 67, -203));
+            merchant.spawnLostMerchant(new Location(world, -456, 117, -1195));
+        } else if (spawnSpot == 8) {
+            //Taiga Villager
+            merchant.spawnLostMerchant(new Location(world, 1123, 67, -203));
+            merchant.spawnLostMerchant(new Location(world, -873, 66, -312));
+            merchant.spawnLostMerchant(new Location(world, -904, 72, 1517));
+        } else {
+            merchant.spawnLostMerchant(new Location(world, 1332, 123, -824));
+            merchant.spawnLostMerchant(new Location(world, -302, 69, 315));
+            merchant.spawnLostMerchant(new Location(world, -904, 72, 1517));
+            merchant.spawnLostMerchant(new Location(world, -903, 72, 701));
+            merchant.spawnLostMerchant(new Location(world, -456, 117, -1195));
+            merchant.spawnLostMerchant(new Location(world, -873, 66, -312));
+            merchant.spawnLostMerchant(new Location(world, 816, 110, 510));
+            merchant.spawnLostMerchant(new Location(world, 1123, 67, -203));
+            Bukkit.broadcastMessage(ChatColor.GOLD + "The Merchant Coalition has sent ALL of its merchants into the world! They are in every available location! Take this time to go and stop by!");
+        }
     }
 
 

@@ -6,6 +6,7 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
@@ -28,6 +29,7 @@ public class PeacesSymphony implements Listener {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(102, 255, 255));
         meta.setDisplayName(ChatColor.AQUA + "The Symphony's Helmet");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.AQUA +  "-- SPECIAL ARMOR --",
@@ -55,6 +57,7 @@ public class PeacesSymphony implements Listener {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(102, 255, 255));
         meta.setDisplayName(ChatColor.AQUA + "The Symphony's Chestplate");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.AQUA +  "-- SPECIAL ARMOR --",
@@ -84,6 +87,7 @@ public class PeacesSymphony implements Listener {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(102, 255, 255));
         meta.setDisplayName(ChatColor.AQUA + "The Symphony's Leggings");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.AQUA +  "-- SPECIAL ARMOR --",
@@ -113,6 +117,7 @@ public class PeacesSymphony implements Listener {
         meta.setUnbreakable(true);
         meta.setColor(Color.fromRGB(102, 255, 255));
         meta.setDisplayName(ChatColor.AQUA + "The Symphony's Boots");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
         meta.setLore(Arrays.asList(
                 ChatColor.GRAY +  "",
                 ChatColor.AQUA +  "-- SPECIAL ARMOR --",

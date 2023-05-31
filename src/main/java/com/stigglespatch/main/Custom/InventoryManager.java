@@ -9,10 +9,12 @@ import com.stigglespatch.main.Custom.Items.Pickaxes;
 import com.stigglespatch.main.Custom.Items.Swords;
 import com.stigglespatch.main.Main;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -47,17 +49,52 @@ public class InventoryManager {
 
     public void setInvMap(UUID uuid, Inventory inv){
         Random rand = new Random();
-        int itemNum = rand.nextInt(10) + 1;
-
+        int itemNum = rand.nextInt(6) + 1;
         addItem(inv, getCustomTradeItems(itemNum), 10);
+        itemNum = rand.nextInt(10) + 1;
         addItem(inv, getMinecraftTradeItems(itemNum), 12);
+        itemNum = rand.nextInt(10) + 1;
         addItem(inv, getMinecraftTradeItems(itemNum), 14);
+        itemNum = rand.nextInt(10) + 1;
         addItem(inv, getMinecraftTradeItems(itemNum), 16);
+        itemNum = rand.nextInt(10) + 1;
         addItem(inv, getMinecraftTradeItems(itemNum), 28);
+        itemNum = rand.nextInt(10) + 1;
         addItem(inv, getMinecraftTradeItems(itemNum), 30);
+        itemNum = rand.nextInt(10) + 1;
+        addItem(inv, getMinecraftTradeItems(itemNum), 32);
+        itemNum = rand.nextInt(10) + 1;
         addItem(inv, getMinecraftTradeItems(itemNum), 34);
+        addFrame(inv);
+        addCloseButton(inv, 49);
 
         merchantList.put(uuid, inv);
+    }
+
+    private void addCloseButton(Inventory inv, int i) {
+            ItemStack item = new ItemStack(Material.BARRIER);
+            ItemMeta meta = item.getItemMeta();
+            meta.setUnbreakable(false);
+            meta.setDisplayName(ChatColor.RED + "Close Shop");
+            item.setItemMeta(meta);
+        addItem(inv, item, 49);
+    }
+
+    public Map<UUID, Inventory> getMerchantUUIDMap(){
+        return merchantList;
+    }
+
+    private void addFrame(Inventory inv) {
+        ItemStack frame = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemMeta frameMeta = frame.getItemMeta();
+        frameMeta.setDisplayName(ChatColor.DARK_GRAY+ " ");
+        frame.setItemMeta(frameMeta);
+
+        for(int i : new int[] {0,1,2,3,4,5,6,7,8,9,11,13,15,17,18,19,20,21,22,23,24,25,26,27,29,
+                               31,33,35,36,37,38,39,40,41,42,43,44,45,46,47,48,50,51,52,53}){
+            inv.setItem(i, frame);
+        }
+
     }
 
     public Inventory getInventoryFromMap(UUID uuid){
@@ -69,7 +106,6 @@ public class InventoryManager {
       ALL FUNCTIONS BELOW ARE FOR ITEMS BEING ADDED TO THE INVENTORIES, NOT INVENTORIES THEMSELVES
 
      */
-
     public ItemStack getCustomTradeItems(int roll){
         if (roll == 1) {
             //Grappling hook
@@ -80,7 +116,7 @@ public class InventoryManager {
             return swords.getTheEmeraldDagger();
         } else if (roll == 3){
             //Moon Shards
-            return lunarArmor.getMoonShards();
+            return lunarArmor.getMoonShards(Main.rollNumber(1,8));
         } else if (roll == 4){
             int armorRoll = Main.rollNumber(1,4);
 
@@ -100,18 +136,31 @@ public class InventoryManager {
             //Smurf Handy Tool
             return pickaxes.giveHandyToolPickaxe();
         } else {
-            Bukkit.getLogger().log(Level.WARNING,"Please give a value 1<=x<=6!");
+            Bukkit.getLogger().log(Level.WARNING,"Please give a value 1<=x<=6!, Value being given: " + roll);
         }
-        return new ItemStack(Material.AIR);
+        return lunarArmor.getMoonShards(Main.rollNumber(1,5));
     }
 
     public ItemStack getMinecraftTradeItems(int roll){
         switch (roll) {
                 case 1:
-                    return new ItemStack(Material.ROTTEN_FLESH, Main.rollNumber(1,10));
+                    ItemStack item0 = new ItemStack(Material.ROTTEN_FLESH);
+                    ItemMeta meta0 = item0.getItemMeta();
+                    item0.setItemMeta(meta0);
+                    meta0.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "8 Emeralds"));
+                    item0.setItemMeta(meta0);
+                    return item0;
                 case 2:
-                    // Code for case 2
-                    return new ItemStack(Material.POISONOUS_POTATO, Main.rollNumber(1,10));
+                    ItemStack item1 = new ItemStack(Material.POISONOUS_POTATO);
+                    ItemMeta meta1 = item1.getItemMeta();
+                    item1.setItemMeta(meta1);
+                    meta1.setLore(Arrays.asList(
+                            ChatColor.GRAY +  "To buy this, it costs",
+                            ChatColor.AQUA + "14 Carrots"));
+                    item1.setItemMeta(meta1);
+                    return item1;
                 case 3:
                     // Code for case 3
                     return new ItemStack(Material.COBWEB, Main.rollNumber(1,10));
@@ -126,51 +175,51 @@ public class InventoryManager {
                     return new ItemStack(Material.FEATHER, Main.rollNumber(1,10));
                 case 7:
                     // Code for case 7
-                    break;
+                    return new ItemStack(Material.PUFFERFISH, Main.rollNumber(1,10));
                 case 8:
                     // Code for case 8
-                    break;
+                    return new ItemStack(Material.SNOWBALL, Main.rollNumber(1,10));
                 case 9:
                     // Code for case 9
-                    break;
+                    return new ItemStack(Material.RED_MUSHROOM, Main.rollNumber(1,10));
                 case 10:
                     // Code for case 10
-                    break;
+                    return new ItemStack(Material.WOODEN_HOE);
                 case 11:
                     // Code for case 11
-                    break;
+                    return new ItemStack(Material.LEATHER_LEGGINGS);
                 case 12:
                     // Code for case 12
-                    break;
+                    return new ItemStack(Material.STONE_AXE);
                 case 13:
                     // Code for case 13
-                    break;
+                    return new ItemStack(Material.WOODEN_PICKAXE);
                 case 14:
                     // Code for case 14
-                    break;
+                    return new ItemStack(Material.GOLDEN_CARROT, Main.rollNumber(2,15));
                 case 15:
                     // Code for case 15
-                    break;
+                    return new ItemStack(Material.ENDER_EYE, Main.rollNumber(1,5));
                 case 16:
                     // Code for case 16
-                    break;
+                    return new ItemStack(Material.SHIELD);
                 case 17:
                     // Code for case 17
-                    break;
+                    return new ItemStack(Material.BOW);
                 case 18:
                     // Code for case 18
-                    break;
+                    return new ItemStack(Material.ARROW, Main.rollNumber(10,32));
                 case 19:
                     // Code for case 19
-                    break;
+                    return new ItemStack(Material.IRON_AXE);
                 case 20:
                     // Code for case 20
-                    break;
+                    return new ItemStack(Material.NETHER_WART, Main.rollNumber(1,5));
             default:
                 Bukkit.getLogger().log(Level.WARNING, "Please give a value 1<=x<=20!");
                 break;
         }
-        return new ItemStack(Material.AIR);
+        return new ItemStack(Material.EMERALD, Main.rollNumber(1,5));
     }
 
     /*
