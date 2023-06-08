@@ -118,17 +118,8 @@ public class InventoryManager {
             //Moon Shards
             return lunarArmor.getShoppingMoonShards(Main.rollNumber(1,8));
         } else if (roll == 4){
-            int armorRoll = Main.rollNumber(1,4);
 
-            if (armorRoll == 1) {
-                return peacesSymphony.getPeaceHelmet(); //TODO - MAKE THIS RETURN THE SHOPPING ITEMSTACK
-            } else if (roll == 2) {
-                return peacesSymphony.getPeaceChestplate(); //TODO - MAKE THIS RETURN THE SHOPPING ITEMSTACK
-            } else if (roll == 3) {
-                return peacesSymphony.getPeaceLeggings(); //TODO - MAKE THIS RETURN THE SHOPPING ITEMSTACK
-            } else if (roll == 4){
-                return peacesSymphony.getPeaceBoots(); //TODO - MAKE THIS RETURN THE SHOPPING ITEMSTACK
-            }
+            return new ItemStack(Material.BARRIER);
         } else if (roll == 5){
             //Bagel
             return bagel.getDaShopperBagel();
@@ -232,7 +223,7 @@ public class InventoryManager {
                     item.setItemMeta(meta);
                     meta.setLore(Arrays.asList(
                             ChatColor.GRAY +  "To buy this, it costs",
-                            ChatColor.AQUA + "11 Wooden Planks"));
+                            ChatColor.AQUA + "6 Wooden Planks"));
                     item.setItemMeta(meta);
                     return item;
                 case 11:
@@ -277,7 +268,7 @@ public class InventoryManager {
                     item.setItemMeta(meta);
                     meta.setLore(Arrays.asList(
                             ChatColor.GRAY +  "To buy this, it costs",
-                            ChatColor.AQUA + "10 Ender Pearl"));
+                            ChatColor.AQUA + "6 Ender Pearl"));
                     item.setItemMeta(meta);
                     return item;
                 case 16:

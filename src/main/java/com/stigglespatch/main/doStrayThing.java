@@ -19,7 +19,7 @@ public class doStrayThing implements CommandExecutor {
         if (sender instanceof Player){
             Player p = (Player) sender;
             if (p.isOp()){
-                main.spawnStrayGroup();
+                //main.spawnStrayGroup();
                 main.spawnTheBeast();
             }
         }

@@ -51,6 +51,36 @@ public class PeacesSymphony implements Listener {
         item.setItemMeta(meta);
         return item;
     }
+
+    public ItemStack getSHOPPeaceHelmet(){
+        ItemStack item = new ItemStack(Material.LEATHER_HELMET);
+        LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
+        meta.setUnbreakable(true);
+        meta.setColor(Color.fromRGB(102, 255, 255));
+        meta.setDisplayName(ChatColor.AQUA + "The Symphony's Helmet");
+        meta.hasItemFlag(ItemFlag.HIDE_ATTRIBUTES);
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.AQUA +  "-- SPECIAL ARMOR --",
+                ChatColor.AQUA + "-= PEACES SYMPHONY =-",
+                ChatColor.GRAY + ChatColor.BOLD.toString() + "USELSS BY ITSELF",
+                ChatColor.GRAY + "When paired with the full",
+                ChatColor.GRAY + "set of PEACES SYMPHONY you",
+                ChatColor.GRAY + "gain the following buffs",
+                ChatColor.GRAY + ChatColor.BOLD.toString() + "NOT IN COMBAT",
+                ChatColor.GRAY + "- Haste I",
+                ChatColor.GRAY + "- Speed I",
+                ChatColor.GRAY + "- Regeneration I"));
+        meta.setLocalizedName("symp_helmet");
+        AttributeModifier genericArmor = new AttributeModifier("generic.armor", 3, AttributeModifier.Operation.ADD_NUMBER);
+        AttributeModifier toughnessArmor = new AttributeModifier("generic.armor_toughness", 2, AttributeModifier.Operation.ADD_NUMBER);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR, genericArmor);
+        meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, toughnessArmor);
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
     public ItemStack getPeaceChestplate(){
         ItemStack item = new ItemStack(Material.LEATHER_CHESTPLATE);
         LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();

@@ -28,11 +28,11 @@ public class Entities implements Listener {
     public static void spawnStrayGroup(Location location){
         spawnHeadStray(location);
         spawnLookoutStray(location);
-        spawnGuard(location);
-        spawnGuard(location);
-        spawnGuard(location);
-        spawnGuard(location);
-        spawnGuard(location);
+        spawnGuard(location, 4);
+        spawnGuard(location, 4);
+        spawnGuard(location, 4);
+        spawnGuard(location, 4);
+        spawnGuard(location, 4);
 
     }
 
@@ -80,7 +80,7 @@ public class Entities implements Listener {
                 if(!mob.isDead()) {
                     if(mob.getTarget() == null){
                         for (Entity entity : mob.getNearbyEntities(40,40,40)){
-                            if (entity instanceof Player && ((Player) entity).hasPotionEffect(PotionEffectType.GLOWING)) {
+                            if (entity instanceof Player) {
                                 Player p = (Player) entity;
                                 mob.setTarget(p);
                             }
@@ -171,8 +171,15 @@ public class Entities implements Listener {
 
     }
 
-    public static void spawnGuard(Location location){
-        Stray mob = location.getWorld().spawn(location, Stray.class);
+    public static void spawnGuard(Location center, int range){
+        double x = center.getX() + (Math.random() * range * 2 - range);
+        double y = center.getY();
+        double z = center.getZ() + (Math.random() * range * 2 - range);
+        Location lowRandomLocation = new Location(center.getWorld(), x, y, z);
+        y = lowRandomLocation.getWorld().getHighestBlockYAt(lowRandomLocation) + 2;
+        Location highRandomLocation = new Location(center.getWorld(), x, y, z);
+
+        Stray mob = highRandomLocation.getWorld().spawn(highRandomLocation, Stray.class);
         mob.setCustomName(ChatColor.LIGHT_PURPLE + "Guard of the Herald");
         mob.setCustomNameVisible(true);
         Attributable mobAt = mob;
@@ -202,7 +209,7 @@ public class Entities implements Listener {
                 if(!mob.isDead()) {
                     if(mob.getTarget() == null){
                         for (Entity entity : mob.getNearbyEntities(40,40,40)){
-                            if (entity instanceof Player && ((Player) entity).hasPotionEffect(PotionEffectType.GLOWING)) {
+                            if (entity instanceof Player) {
                                 Player p = (Player) entity;
                                 mob.setTarget(p);
                             }

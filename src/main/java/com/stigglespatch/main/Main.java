@@ -11,35 +11,36 @@ import com.stigglespatch.main.Custom.Items.Bows.BoomBow;
 import com.stigglespatch.main.Custom.Items.Bows.GlowBow;
 import com.stigglespatch.main.Custom.Items.Pickaxes;
 import com.stigglespatch.main.Custom.Items.Swords;
-import com.stigglespatch.main.Database.ConnectionListener;
-import com.stigglespatch.main.Database.Database;
-import com.stigglespatch.main.Database.PlayerManager;
 import com.stigglespatch.main.Dungeon.*;
 import com.stigglespatch.main.Dungeon.Cuboids.Cuboid;
 import com.stigglespatch.main.Misc.CreativeCommand;
 import com.stigglespatch.main.Misc.SMPCommand;
 import org.bukkit.*;
+import org.bukkit.block.Biome;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
+import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.sql.SQLException;
 import java.util.*;
-
-import static java.lang.System.*;
 
 
 public final class Main extends JavaPlugin implements Listener {
@@ -48,8 +49,6 @@ public final class Main extends JavaPlugin implements Listener {
     public static boolean closedBossEntry = false;
     public boolean blazingBeastSpawned = false;
 
-
-    private Database database;
     public static int roomNumber = 0;
 
     public int getRoomNumber(){
@@ -57,7 +56,6 @@ public final class Main extends JavaPlugin implements Listener {
     }
     DungeonStartCommand dSC = new DungeonStartCommand();
     //DungeonMobs dungeonMobs = new DungeonMobs();
-    private PlayerManager playerManager;
     PeacesSymphony peacesSymphony = new PeacesSymphony();
     LunarArmor lunarArmor = new LunarArmor();
     LostMerchant merchant = new LostMerchant();
@@ -71,14 +69,6 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
 
-        database = new Database();
-        try {
-            database.connect();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        playerManager = new PlayerManager();
-
         //40 93 792
 
         Bukkit.getPluginCommand("dungeon").setExecutor(new DungeonCommand(this));
@@ -90,6 +80,7 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginCommand("strayGroup").setExecutor(new doStrayThing(this));
         Bukkit.getPluginCommand("spawn-merchant").setExecutor(new spawnMerchant(this));
 
+        /*
         if (Bukkit.getWorld("smp_cinco") == null) {
             Bukkit.getServer().createWorld(new WorldCreator("smp_cinco"));
         }
@@ -97,8 +88,8 @@ public final class Main extends JavaPlugin implements Listener {
             Bukkit.getServer().createWorld(new WorldCreator("testdungeon"));
         }
         out.println("Generated the third-party worlds.");
+         */
 
-        Bukkit.getPluginManager().registerEvents(new ConnectionListener(this), this);
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new DungeonStartCommand(), this);
         Bukkit.getPluginManager().registerEvents(new DungeonMobs(), this);
@@ -120,25 +111,70 @@ public final class Main extends JavaPlugin implements Listener {
         }.runTaskTimer(this, 0, 40);
         new BukkitRunnable() {
             public void run() {
+                snowySpawn();
+            }
+        }.runTaskTimer(this, 200, 20*(60*15));
+        new BukkitRunnable() {
+            public void run() {
                 lunarArmor.checkForLunarArmor();
             }
         }.runTaskTimer(this, 0, 40);
+        /*
         new BukkitRunnable() { public void run() {
             spawnStrayGroup(); }
         }.runTaskTimer(this, 20*30, 20*(60*10));
         new BukkitRunnable() { public void run() {
             startForBlazingBeast(); }
         }.runTaskTimer(this, 20*30, 20*(60*30));
-        new BukkitRunnable() { public void run() {
-            merchantTime(); }
-        }.runTaskTimer(this, 20*30, 20*(60*10));
+        new BukkitRunnable() { public void run() {  merchantTime(); }}.runTaskTimer(this, 20*30, 20*(60*10));
+         */
 
         //CUSTOM CRAFTING RECIPES
 
-        ItemStack customItem = new ItemStack(Material.EMERALD);
-        ItemMeta meta = customItem.getItemMeta();
-        meta.setLocalizedName("emerald_blade");
-        customItem.setItemMeta(meta);
+        ItemStack item = new ItemStack(Material.EMERALD);
+        ItemMeta meta = item.getItemMeta();
+        meta.setUnbreakable(true);
+        meta.setDisplayName(ChatColor.GREEN + "Emerald Dagger");
+        meta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "Has a random chance to drop",
+                ChatColor.GRAY + "multiple emeralds on a kill. ",
+                ChatColor.GRAY + "",
+                ChatColor.GRAY + "When enchanted with Sharpness V",
+                ChatColor.GRAY + "the dagger unlocks a special",
+                ChatColor.GRAY + "ability."));
+        meta.setLocalizedName("emerald_dagger");
+        item.setItemMeta(meta);
+
+        ItemStack finalItem = new ItemStack(Material.EMERALD);
+        ItemMeta finalMeta = finalItem.getItemMeta();
+        finalMeta.setUnbreakable(true);
+        finalMeta.setDisplayName(ChatColor.GREEN + "Emerald Dagger");
+        finalMeta.setLore(Arrays.asList(
+                ChatColor.GRAY +  "",
+                ChatColor.GOLD +  "-- SPECIAL ITEM --",
+                ChatColor.GRAY + "Has a random chance to drop",
+                ChatColor.GRAY + "multiple emeralds on a kill. ",
+                ChatColor.GRAY + "",
+                ChatColor.GRAY + "Since enchanted with Sharpness V,",
+                ChatColor.GRAY + "the dagger deals 15-30 damage"));
+        finalMeta.setLocalizedName("emerald_dagger");
+        finalItem.setItemMeta(finalMeta);
+
+        // Create the enchanted book with Sharpness V
+        ItemStack sharpnessBook = new ItemStack(Material.ENCHANTED_BOOK);
+        EnchantmentStorageMeta bookItemMeta = (EnchantmentStorageMeta) sharpnessBook.getItemMeta();
+        bookItemMeta.addStoredEnchant(Enchantment.DAMAGE_ALL, 5, true);
+        sharpnessBook.setItemMeta(meta);
+
+        // Create the shapeless recipe
+        ShapelessRecipe recipe = new ShapelessRecipe(new NamespacedKey(this, "emerald_blade"), finalItem);
+        recipe.addIngredient(new RecipeChoice.ExactChoice(sharpnessBook));
+        recipe.addIngredient(new RecipeChoice.ExactChoice(item));
+
+        // Register the recipe
+        getServer().addRecipe(recipe);
 
 
 
@@ -168,6 +204,33 @@ public final class Main extends JavaPlugin implements Listener {
         */
     }
 
+    private void snowySpawn() {
+        for(Player p : Bukkit.getOnlinePlayers()){
+            if (p.getWorld().getBiome(p.getLocation()).equals(Biome.SNOWY_BEACH) ||
+                    p.getWorld().getBiome(p.getLocation()).equals(Biome.SNOWY_PLAINS) ||
+                    p.getWorld().getBiome(p.getLocation()).equals(Biome.SNOWY_SLOPES) ||
+                    p.getWorld().getBiome(p.getLocation()).equals(Biome.SNOWY_TAIGA)){
+                Location center = p.getLocation();
+                double range = 75;
+                double x = center.getX() + (Math.random() * range * 2 - range);
+                double y = center.getY();
+                double z = center.getZ() + (Math.random() * range * 2 - range);
+                Location lowRandomLocation = new Location(center.getWorld(), x, y, z);
+                y = lowRandomLocation.getWorld().getHighestBlockYAt(lowRandomLocation) + 2;
+                Location highRandomLocation = new Location(center.getWorld(), x, y, z);
+
+                groupLighning(highRandomLocation);
+                groupLighning(highRandomLocation);
+                groupLighning(highRandomLocation);
+                groupLighning(highRandomLocation);
+                groupLighning(highRandomLocation);
+
+                new BukkitRunnable() { public void run() { Entities.spawnStrayGroup(highRandomLocation);  } }.runTaskLater(this, 40);
+
+            }
+        }
+    }
+
     private void getEntitiesInRoom(Cuboid collectionRoom) {
         for(Block block : collectionRoom.getBlocks()){
             if(block.getType().equals(Material.LIGHT_GRAY_CANDLE)){
@@ -176,21 +239,6 @@ public final class Main extends JavaPlugin implements Listener {
                 DungeonMobs.spawnDungeonSkeleton(block.getLocation().add(0,1,0));
             } else if (block.getType().equals(Material.CYAN_CANDLE)){
                 DungeonMobs.spawnDungeonCreeper(block.getLocation().add(0,1,0));
-            }
-        }
-    }
-
-    public void spawnStrayGroup(){
-        for(Player player : Bukkit.getOnlinePlayers()){
-            for(Entity e : player.getNearbyEntities(128, 128, 128)){
-                if (e instanceof Stray){
-                    if (Entities.rollNumber(1,5) == 5){
-                        Bukkit.getWorld("world").strikeLightning(e.getLocation());
-                        Entities.spawnStrayGroup(e.getLocation());
-                        e.remove();
-                        player.sendMessage(ChatColor.RED + "[Warning] A stray group has spawned near you, stay on the lookout!");
-                    }
-                }
             }
         }
     }
@@ -215,16 +263,16 @@ public final class Main extends JavaPlugin implements Listener {
 
     public void spawnTheBeast(){
 
-        groupLighning();
-        groupLighning();
-        groupLighning();
-        groupLighning();
-        groupLighning();
-        groupLighning();
-        groupLighning();
-        groupLighning();
-        groupLighning();
-        groupLighning();
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
+        groupLighning(new Location(Bukkit.getWorld("world_nether"), 96, 206, 225));
 
         for (Player p : Bukkit.getOnlinePlayers()){
             if (p.getWorld().getName().equals("world_nether")) {
@@ -239,9 +287,9 @@ public final class Main extends JavaPlugin implements Listener {
         blazingBeastSpawned = true;
     }
 
-    private void groupLighning() {
+    private void groupLighning(Location location) {
         new BukkitRunnable() { public void run() {
-            Bukkit.getWorld("world_nether").strikeLightningEffect(new Location(Bukkit.getWorld("world_nether"),96 ,206 ,225));
+            Bukkit.getWorld("world_nether").strikeLightning(location);
         }
         }.runTaskLater(this, 15);
     }
@@ -350,23 +398,12 @@ public final class Main extends JavaPlugin implements Listener {
     public void merchantTime() {
         World world = Bukkit.getWorld("world"); //World object
 
-        for(Entity e : world.getEntities()){
-            if (e instanceof Villager){
-                if (e.getCustomName() != null && e.getCustomName().equals(ChatColor.AQUA + "Merchant Marketeer")){
-                    e.remove();
-                }
-            }
+        if (!merchant.getMerchantEntities().isEmpty()) {
+            for(UUID id : merchant.getMerchantEntities()){ (Bukkit.getEntity(id)).remove(); }
         }
+
         doMerchantyThing(world);
 
-    }
-
-    @Override
-    public void onDisable(){
-        database.disconnect();
-        //dSC.getPlayersList().clear();
-        //dSC.getAlivePlayers().clear();
-        //roomsFinished.clear();
     }
 
     @EventHandler
@@ -394,17 +431,44 @@ public final class Main extends JavaPlugin implements Listener {
             e.setCancelled(true);
         }
     }
+
     @EventHandler
-    public void onNether(PlayerChangedWorldEvent e) {
-        if (e.getFrom().getName().equals("world")) {
-            e.getPlayer().teleport(new Location(Bukkit.getWorld("world_nether"), 68, 194, 61, -180, 0));
-        } else if (e.getFrom().getName().equals("world_nether")){
-            e.getPlayer().teleport(new Location(Bukkit.getWorld("world"),6, 92, 779, -90, 0));
+    public void eyeOfEnderUse(EntitySpawnEvent e) {
+        if (e.getEntity().equals(EntityType.ENDER_SIGNAL)){
+            EnderSignal enderSignal = (EnderSignal) e.getEntity();
+            if (e.getEntity().getWorld().equals("world")){
+                enderSignal.setTargetLocation(new Location(Bukkit.getWorld("world"), -820, -7, -672));
+            }
         }
     }
 
-    public Database getDatabase() { return database; }
-    public PlayerManager getPlayerManager() { return playerManager; }
+    @EventHandler
+    public void interact(PlayerInteractEvent e){
+        if (e.getAction().equals(Action.RIGHT_CLICK_AIR) || e.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
+            Player p = e.getPlayer();
+            if(p.getInventory().getItemInMainHand().equals(Material.ENDER_EYE)){
+                Location targetLocation = new Location(Bukkit.getWorld("world"), -820, -7, -672);
+
+                EnderSignal enderSignal = Bukkit.getWorld("world").spawn(p.getLocation().add(0,2,0), EnderSignal.class);
+                enderSignal.setDropItem(false);
+                enderSignal.setTargetLocation(targetLocation);
+                int eyeAmount = p.getInventory().getItemInMainHand().getAmount();
+                enderSignal.setDespawnTimer(0);
+                int newEyeAmount = eyeAmount-1;
+                p.getInventory().getItemInMainHand().setAmount(newEyeAmount);
+            }
+        }
+    }
+    /*@EventHandler
+    public void onNether(PlayerChangedWorldEvent e) {
+        if (e.getFrom().getName().equals("world")) {
+            if (!e.getPlayer().getWorld().equals("world_end")) {
+                e.getPlayer().teleport(new Location(Bukkit.getWorld("world_nether"), 68, 194, 61, -180, 0));
+            }
+        } else if (e.getFrom().getName().equals("world_nether")){
+            e.getPlayer().teleport(e.getPlayer().getBedSpawnLocation());
+        }
+    }*/
     public NamespacedKey getNamespacedKey() { return pendant; }
 
     public static int rollNumber(int min, int max){
@@ -416,6 +480,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     private void doMerchantyThing(World world) {
         inventoryManager.getMerchantUUIDMap().clear(); //Clear the map
+        merchant.getMerchantEntities().clear();
 
         //Community Center Villager
         Villager vilTheVillager = merchant.spawnLostMerchant(new Location(world, 54, 101, 785)); //Make villager
